@@ -83,13 +83,6 @@ echo "A command that will not be run"
 
 Let's breakdown what this embedded yaml annotation is doing. There are two fields in our yaml document ```name``` and ```expected_stdout_lines```. The name field simply provides a name for the step that will be printed to the report that mm.py generates. The expected_stdout_lines field is actually telling mm.py what it should be looking for from stdout when it executes our code block(s). For more on this, checkout [io.md](io.md). 
 
-
-Code blocks must be tagged as either "bash" or "sh". Code from other languages will be ignored.
-
-
-<!-- END_STEP -->
-
-
 ## CLI
 
 ### Help
@@ -98,12 +91,13 @@ For a list of options:
 <!-- STEP 
 name: CLI help
 expected_stdout_lines:
-  - "usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] markdown_file"
+  - "usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]"
+  - "             [MARKDOWN_FILE]"
   - "Auto validate markdown documentation"
-  - "positional arguments:"
-  - "  markdown_file"
   - "optional arguments:"
   - "  -h, --help            show this help message and exit"
+  - "  --version, -v         Print version and exit"
+  - "  MARKDOWN_FILE         The annotated markdown file to run/execute"
   - "  --dry-run, -d         Print out the commands we would run based on"
   - "                        markdown_file"
   - "  --manual, -m          If your markdown_file contains manual validation"
@@ -119,20 +113,37 @@ mm.py --help
 <!-- END_STEP -->
 
 ```
-usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] markdown_file
+usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]
+             [MARKDOWN_FILE]
 
 Auto validate markdown documentation
 
-positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
+  --version, -v         Print version and exit
+
+  MARKDOWN_FILE         The annotated markdown file to run/execute
   --dry-run, -d         Print out the commands we would run based on
-			markdown_file
+                        markdown_file
   --manual, -m          If your markdown_file contains manual validation
-			steps, pause for user input
+                        steps, pause for user input
   --shell SHELL_CMD, -s SHELL_CMD
-			Specify a different shell to use
+                        Specify a different shell to use
 ```
+
+### Version
+
+<!-- STEP 
+name: CLI version
+expected_stderr_lines:
+  - "mm.py version:"
+-->
+
+```bash
+mm.py --version
+```
+
+<!-- END_STEP -->
 
 ### Dry Run
 You can do a dry run to print out exactly what commands will be run using the '-d' flag.

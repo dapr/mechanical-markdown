@@ -8,7 +8,7 @@ import os
 import subprocess
 import unittest
 
-from mechanical_markdown import MechanicalMarkdown
+from mechanical_markdown import MechanicalMarkdown, MarkdownAnnotationError
 from unittest.mock import patch, MagicMock, call
 
 
@@ -437,3 +437,34 @@ echo "test"
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
                                            env=os.environ)
+
+    def test_missing_end_tag_throws_exception(self):
+        test_data = """
+<!-- STEP
+name: basic test
+-->
+
+```bash
+echo "test"
+```
+
+"""
+        with self.assertRaises(MarkdownAnnotationError):
+            MechanicalMarkdown(test_data)
+
+    def test_missing_extra_tag_throws_exception(self):
+        test_data = """
+<!-- STEP
+name: basic test
+-->
+
+```bash
+echo "test"
+```
+
+<!-- END_STEP -->
+
+<!-- END_STEP -->
+"""
+        with self.assertRaises(MarkdownAnnotationError):
+            MechanicalMarkdown(test_data)
