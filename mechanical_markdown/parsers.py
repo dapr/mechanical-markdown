@@ -14,6 +14,10 @@ start_token = 'STEP'
 end_token = 'END_STEP'
 
 
+class MarkdownAnnotationError(Exception):
+    pass
+
+
 class HTMLCommentParser(HTMLParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -41,7 +45,7 @@ class RecipeParser(Renderer):
         comment_body = comment_parser.comment_text
         if comment_body.find(end_token) >= 0:
             if self.current_step is None:
-                return ""
+                raise MarkdownAnnotationError("Unexpected <!-- {} --> found".format(end_token))
             self.all_steps.append(self.current_step)
             self.current_step = None
             return ""
