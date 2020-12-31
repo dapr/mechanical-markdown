@@ -5,7 +5,7 @@ Licensed under the MIT License.
 """
 
 from mistune import Markdown
-from mechanical_markdown.parsers import RecipeParser
+from mechanical_markdown.parsers import RecipeParser, end_token, MarkdownAnnotationError
 
 
 class Recipe:
@@ -13,6 +13,8 @@ class Recipe:
         parser = RecipeParser()
         md = Markdown(parser, extensions=('fenced-code',))
         md(markdown)
+        if parser.current_step is not None:
+            raise MarkdownAnnotationError('Reached end of input searching for <!-- {} -->'.format(end_token))
         self.all_steps = parser.all_steps
 
     def exectute_steps(self, manual, default_shell='bash -c'):

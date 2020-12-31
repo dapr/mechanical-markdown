@@ -12,7 +12,7 @@ except FileNotFoundError:
 # This call to setup() does all the work
 setup(
     name="mechanical-markdown",
-    version="0.1.6",
+    version="0.1.7",
     description="Run markdown recipes as shell scripts",
     long_description=README,
     long_description_content_type="text/markdown",
