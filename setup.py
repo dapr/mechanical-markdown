@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from mechanical_markdown import __version__ as version
 
 # The text of the README file
 README = ""
@@ -12,7 +13,7 @@ except FileNotFoundError:
 # This call to setup() does all the work
 setup(
     name="mechanical-markdown",
-    version="0.1.7",
+    version=version,
     description="Run markdown recipes as shell scripts",
     long_description=README,
     long_description_content_type="text/markdown",

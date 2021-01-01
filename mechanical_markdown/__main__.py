@@ -1,4 +1,4 @@
-from mechanical_markdown import MechanicalMarkdown
+import mechanical_markdown
 
 import sys
 import argparse
@@ -6,23 +6,39 @@ import argparse
 
 def main():
     parse_args = argparse.ArgumentParser(description='Auto validate markdown documentation')
-    parse_args.add_argument('markdown_file', metavar='markdown_file', nargs=1, type=argparse.FileType('r'))
-    parse_args.add_argument('--dry-run', '-d',
-                            dest='dry_run',
+    group = parse_args.add_argument_group()
+    group.add_argument('markdown_file',
+                       metavar='MARKDOWN_FILE',
+                       nargs='?',
+                       type=argparse.FileType('r'),
+                       help="The annotated markdown file to run/execute")
+    group.add_argument('--dry-run', '-d',
+                       dest='dry_run',
+                       action='store_true',
+                       help='Print out the commands we would run based on markdown_file')
+    group.add_argument('--manual', '-m',
+                       dest='manual',
+                       action='store_true',
+                       help='If your markdown_file contains manual validation steps, pause for user input')
+    group.add_argument('--shell', '-s',
+                       dest='shell_cmd',
+                       default='bash -c',
+                       help='Specify a different shell to use')
+    parse_args.add_argument('--version',
+                            dest='print_version',
                             action='store_true',
-                            help='Print out the commands we would run based on markdown_file')
-    parse_args.add_argument('--manual', '-m',
-                            dest='manual',
-                            action='store_true',
-                            help='If your markdown_file contains manual validation steps, pause for user input')
-    parse_args.add_argument('--shell', '-s',
-                            dest='shell_cmd',
-                            default='bash -c',
-                            help='Specify a different shell to use')
+                            help='Print version and exit')
     args = parse_args.parse_args()
 
-    body = args.markdown_file[0].read()
-    r = MechanicalMarkdown(body)
+    if args.print_version:
+        parse_args.exit(status=0, message='{} version:\nv{}'.format(parse_args.prog, mechanical_markdown.__version__))
+
+    if args.markdown_file is None:
+        parse_args.error('You must provide exactly one markdown file to operate on.\n\
+                         Try "{} -h" for more info'.format(parse_args.prog))
+
+    body = args.markdown_file.read()
+    r = mechanical_markdown.MechanicalMarkdown(body)
     success = True
 
     if args.dry_run:
