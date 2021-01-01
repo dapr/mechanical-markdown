@@ -2,8 +2,6 @@ name: mechanical-markdown
 
 on:
   push:
-    branches:
-      - main
     tags:
       - v*
   pull_request:
@@ -16,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_VER: 3.7
-      TWINE_USERNAME: ${{ secrets.PYPI_UPLOAD_USER }}
-      TWINE_PASSWORD: ${{ secrets.PYPI_UPLOAD_PASS }}
+      TWINE_USERNAME: "__token__"
+      TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ env.PYTHON_VER }}
