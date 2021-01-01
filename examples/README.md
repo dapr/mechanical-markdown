@@ -96,7 +96,7 @@ expected_stdout_lines:
   - "Auto validate markdown documentation"
   - "optional arguments:"
   - "  -h, --help            show this help message and exit"
-  - "  --version, -v         Print version and exit"
+  - "  --version             Print version and exit"
   - "  MARKDOWN_FILE         The annotated markdown file to run/execute"
   - "  --dry-run, -d         Print out the commands we would run based on"
   - "                        markdown_file"
@@ -120,7 +120,7 @@ Auto validate markdown documentation
 
 optional arguments:
   -h, --help            show this help message and exit
-  --version, -v         Print version and exit
+  --version             Print version and exit
 
   MARKDOWN_FILE         The annotated markdown file to run/execute
   --dry-run, -d         Print out the commands we would run based on
