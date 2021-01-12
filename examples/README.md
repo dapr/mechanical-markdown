@@ -154,6 +154,7 @@ expected_stdout_lines:
   - "Would run the following validation steps:"
   - "Step: Hello World"
   - "Step: CLI help"
+  - "Step: CLI version"
   - "Step: CLI dry run"
   - "Step: Pause for manual validation"
 -->

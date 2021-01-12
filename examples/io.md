@@ -1,5 +1,6 @@
 # I/O Validation
 
+## Using This Guide
 This is an example markdown file with an annotated test command.
 
 To see a summary of what commands will be run:
@@ -15,6 +16,8 @@ mm.py io.md
 ```
 
 Be sure to checkout the raw version of this file to see the annotations.
+
+## Checking stdout/stderr
 
 This is an annotated command. When the ```mm.py``` utility is run, the following code block will be executed:
 
@@ -49,6 +52,34 @@ echo "another_output_line"
 echo "test2"
 
 echo "error" 1>&2
+```
+
+<!-- END_STEP -->
+
+## Checking return code
+
+By default, all code blocks are expected to return 0. You can change this behavior with the directive ```expected_return_code```:
+
+<!-- STEP
+name: Non-zero Return Code
+expected_return_code: 1
+-->
+
+```bash
+exit 1
+```
+
+<!-- END_STEP -->
+
+A missing or null value for ```expected_return_code``` will ignore all return codes.
+
+<!-- STEP
+name: Ignore Return Code
+expected_return_code:
+-->
+
+```bash
+exit 15
 ```
 
 <!-- END_STEP -->
