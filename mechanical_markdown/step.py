@@ -79,7 +79,7 @@ class Step:
         for command in self.commands:
             if self.background:
                 command.wait_or_timeout(self.timeout)
-                if command.return_code != self.expect_return_code:
+                if self.expect_return_code is not None and command.return_code != self.expect_return_code:
                     success = False
         return success
 
