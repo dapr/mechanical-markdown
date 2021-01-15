@@ -23,7 +23,7 @@ setup(
     description="Run markdown recipes as shell scripts",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/wcs1only/mechanical-markdown",
+    url="https://github.com/dapr/mechanical-markdown",
     author="Charlie Stanley",
     author_email="Charlie.Stanley@microsoft.com",
     license="MIT",
