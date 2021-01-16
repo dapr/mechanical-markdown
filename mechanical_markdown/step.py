@@ -29,6 +29,7 @@ class Step:
             self.expected_lines['stdout'] = parameters["expected_stdout_lines"]
         if "expected_stderr_lines" in parameters and parameters["expected_stderr_lines"] is not None:
             self.expected_lines['stderr'] = parameters["expected_stderr_lines"]
+        self.expect_return_code = 0 if "expected_return_code" not in parameters else parameters["expected_return_code"]
         self.working_dir = os.getcwd() if "working_dir" not in parameters else parameters["working_dir"]
         self.timeout = default_timeout_seconds if "timeout_seconds" not in parameters else parameters["timeout_seconds"]
         self.env = dict(os.environ, **parameters['env']) if "env" in parameters else os.environ
@@ -50,7 +51,7 @@ class Step:
             command.run(self.working_dir, self.env, shell)
             if not self.background:
                 command.wait_or_timeout(self.timeout)
-                if command.return_code != 0:
+                if self.expect_return_code is not None and command.return_code != self.expect_return_code:
                     return False
             if self.sleep:
                 time.sleep(self.sleep)
@@ -69,6 +70,8 @@ class Step:
             for expected in self.expected_lines[out]:
                 retstr += "\t\t{}\n".format(expected)
 
+        retstr += "\tExpected return code: {}\n".format(self.expect_return_code)
+
         return retstr + "\n"
 
     def wait_for_all_background_commands(self):
@@ -76,7 +79,7 @@ class Step:
         for command in self.commands:
             if self.background:
                 command.wait_or_timeout(self.timeout)
-                if command.return_code != 0:
+                if self.expect_return_code is not None and command.return_code != self.expect_return_code:
                     success = False
         return success
 
@@ -89,7 +92,9 @@ class Step:
         for c in self.commands:
             if c.process is not None:
                 color = 'green'
-                if c.return_code != 0:
+                if self.expect_return_code is None:
+                    color = 'yellow'
+                elif c.return_code != self.expect_return_code:
                     color = 'red'
                 report += "\tcommand: `{}`\n\treturn_code: {}\n".format(c.command, colored(c.return_code, color))
 

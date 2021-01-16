@@ -344,6 +344,7 @@ echo "test2"`
 \t\ttest
 \t\ttest2
 \tExpected stderr:
+\tExpected return code: 0
 
 Step: step 2
 \tcommands to run with 'bash -c':
@@ -353,6 +354,7 @@ echo "bar" >2`
 \t\tfoo
 \tExpected stderr:
 \t\tbar
+\tExpected return code: 0
 
 """
         self.assertEqual(expected_output, output)
@@ -468,3 +470,45 @@ echo "test"
 """
         with self.assertRaises(MarkdownAnnotationError):
             MechanicalMarkdown(test_data)
+
+    def test_expect_status_code_success(self):
+        test_data = """
+<!-- STEP
+name: expect returns 1
+expected_return_code: 1
+-->
+
+```bash
+exit 1
+```
+
+<!-- END_STEP -->
+
+<!-- STEP
+name: ignore return code
+expected_return_code:
+-->
+
+```bash
+exit 15
+```
+
+<!-- END_STEP -->
+"""
+        self.prep_command_ouput("test", "", 1)
+        self.prep_command_ouput("test", "", 15)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.exectute_steps(False)
+        self.assertTrue(success)
+        calls = [call(['bash', '-c', 'exit 1'],
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      universal_newlines=True,
+                      env=os.environ),
+                 call().communicate(timeout=60),
+                 call(['bash', '-c', 'exit 15'],
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      universal_newlines=True,
+                      env=os.environ)]
+        self.popen_mock.assert_has_calls(calls)
