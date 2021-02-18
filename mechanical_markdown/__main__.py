@@ -34,6 +34,11 @@ def main():
                             dest='print_version',
                             action='store_true',
                             help='Print version and exit')
+    parse_args.add_argument('--validate-links', '-l',
+                            dest='validate_links',
+                            default=False,
+                            action='store_true',
+                            help='Check for broken links to external URLs')
     args = parse_args.parse_args()
 
     if args.print_version:
@@ -52,7 +57,7 @@ def main():
         print(r.dryrun(args.shell_cmd))
         sys.exit(0)
 
-    success, report = r.exectute_steps(args.manual, args.shell_cmd)
+    success, report = r.exectute_steps(args.manual, args.shell_cmd, validate_links=args.validate_links)
     print(report)
     if not success:
         sys.exit(1)

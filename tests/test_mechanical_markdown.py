@@ -10,6 +10,7 @@ import unittest
 
 from mechanical_markdown import MechanicalMarkdown, MarkdownAnnotationError
 from unittest.mock import patch, MagicMock, call
+from termcolor import colored
 
 
 class MechanicalMarkdownTests(unittest.TestCase):
@@ -512,3 +513,36 @@ exit 15
                       universal_newlines=True,
                       env=os.environ)]
         self.popen_mock.assert_has_calls(calls)
+
+    def test_link_validation(self):
+        test_data = """
+A link that should work: [Mechanical Markdown](https://github.com/dapr/mechanical-markdown)
+
+Relative links not currently supported: [Relative Link](examples/README.md)
+
+"""
+        self.prep_command_ouput("test", "", 0)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.exectute_steps(False, validate_links=True)
+        self.assertTrue(success)
+        expected_report = f"""
+External link validation:
+\thttps://github.com/dapr/mechanical-markdown Status: {colored('200', 'green')}
+"""
+        self.assertEqual(expected_report, report)
+
+    def test_link_validation_fails_for_broken_link(self):
+        test_data = """
+A link that should not work: [Mechanical Markdown](https://github.com/dapr/mechanical-markdown/a_bad_link)
+A request to a non-existant host: [Mechanical Markdown](https://0.0.0.0/a_bad_link)
+"""
+        self.prep_command_ouput("test", "", 0)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.exectute_steps(False, validate_links=True)
+        self.assertFalse(success)
+        expected_report = f"""
+External link validation:
+\thttps://github.com/dapr/mechanical-markdown/a_bad_link Status: {colored('404', 'red')}
+\thttps://0.0.0.0/a_bad_link Status: {colored('Connection Failed', 'red')}
+"""
+        self.assertEqual(expected_report, report)
