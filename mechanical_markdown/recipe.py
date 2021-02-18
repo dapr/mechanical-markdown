@@ -4,8 +4,10 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT License.
 """
 
+import requests
 from mistune import Markdown
 from mechanical_markdown.parsers import RecipeParser, end_token, MarkdownAnnotationError
+from termcolor import colored
 
 
 class Recipe:
@@ -16,8 +18,9 @@ class Recipe:
         if parser.current_step is not None:
             raise MarkdownAnnotationError('Reached end of input searching for <!-- {} -->'.format(end_token))
         self.all_steps = parser.all_steps
+        self.external_links = parser.external_links
 
-    def exectute_steps(self, manual, default_shell='bash -c'):
+    def exectute_steps(self, manual, default_shell='bash -c', validate_links=False):
         success = True
         report = ""
         for step in self.all_steps:
@@ -33,6 +36,21 @@ class Recipe:
             if not s:
                 success = False
             report += r
+
+        if validate_links:
+            report += "\nExternal link validation:\n"
+            for link in self.external_links:
+                try:
+                    response = requests.get(link)
+                    if response.status_code >= 400:
+                        success = False
+                        report += f'\t{link} Status: {colored(response.status_code, "red")}\n'
+                    else:
+                        report += f'\t{link} Status: {colored(response.status_code, "green")}\n'
+                except requests.exceptions.ConnectionError:
+                    success = False
+                    report += f'\t{link} Status: {colored("Connection Failed", "red")}\n'
+
         return success, report
 
     def dryrun(self, default_shell='bash -c'):

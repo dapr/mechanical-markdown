@@ -63,7 +63,7 @@ print(ouput)
 
 # Run the commands in the order they were specified and return a boolean for succes or failure
 # Also returns a report summarizing what was run and stdout/sterr for each command
-success, report = exectute_steps(manual, default_shell='bash -c')
+success, report = exectute_steps(manual, default_shell='bash -c', validate_links=False)
 print(report)
 
 

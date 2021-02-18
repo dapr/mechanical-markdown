@@ -92,11 +92,13 @@ For a list of options:
 name: CLI help
 expected_stdout_lines:
   - "usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]"
+  - "             [--validate-links]"
   - "             [MARKDOWN_FILE]"
   - "Auto validate markdown documentation"
   - "optional arguments:"
   - "  -h, --help            show this help message and exit"
   - "  --version             Print version and exit"
+  - "  --validate-links, -l  Check for broken links to external URLs"
   - "  MARKDOWN_FILE         The annotated markdown file to run/execute"
   - "  --dry-run, -d         Print out the commands we would run based on"
   - "                        markdown_file"
@@ -114,6 +116,7 @@ mm.py --help
 
 ```
 usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]
+             [--validate-links]
              [MARKDOWN_FILE]
 
 Auto validate markdown documentation
@@ -121,6 +124,7 @@ Auto validate markdown documentation
 optional arguments:
   -h, --help            show this help message and exit
   --version             Print version and exit
+  --validate-links, -l  Check for broken links to external URLs
 
   MARKDOWN_FILE         The annotated markdown file to run/execute
   --dry-run, -d         Print out the commands we would run based on
@@ -236,8 +240,25 @@ manual_pause_message: "Waiting for user input"
 mm.py -m README.md 
 ```
 
+### Link validation
+
+Mechanical markdown can optionally check your document for broken external links. It does so by simply making a GET request to any link it finds so long as that link begins with ```http(s)://```. Relative links are not currently supported. Any 2XX or 3XX status code response will be treated as success. Any 4XX or 5XX response will be treated as an error.
+
+```bash
+mm.py -l README.md
+```
+
+This will append to the report a footer to the runtime report:
+```
+External link validation:
+        https://github.com/dapr/quickstarts Status: 200
+        https://dapr.io/ Status: 200
+```
+
 # More examples:
 
 - For more details on checking stdout/stderr: [I/O Validation](io.md)
 - For more details on setting up the execution environment: [Environment Variables](env.md) and [Working Directory](working_dir.md)
 - For controlling timeouts, backgrounding, and adding delay between steps: [Sleeping, Timeouts, and Backgrounding](background.md)
+
+This tool was written to support the [Dapr Quickstarts](https://github.com/dapr/quickstarts). Be sure to check out [Dapr](https://dapr.io/)!
