@@ -6,7 +6,7 @@ Licensed under the MIT License.
 
 import requests
 from mistune import Markdown
-from mechanical_markdown.parsers import RecipeParser, end_token, MarkdownAnnotationError
+from mechanical_markdown.parsers import RecipeParser, end_token, end_ignore_links_token, MarkdownAnnotationError
 from termcolor import colored
 
 
@@ -16,7 +16,9 @@ class Recipe:
         md = Markdown(parser, extensions=('fenced-code',))
         md(markdown)
         if parser.current_step is not None:
-            raise MarkdownAnnotationError('Reached end of input searching for <!-- {} -->'.format(end_token))
+            raise MarkdownAnnotationError(f'Reached end of input searching for <!-- {end_token} -->')
+        if parser.ignore_links:
+            raise MarkdownAnnotationError(f'Reached end of input searching for <!-- {end_ignore_links_token}')
         self.all_steps = parser.all_steps
         self.external_links = parser.external_links
 
@@ -39,7 +41,10 @@ class Recipe:
 
         if validate_links:
             report += "\nExternal link validation:\n"
-            for link in self.external_links:
+            for link, ignore in self.external_links:
+                if ignore:
+                    report += f'\t{link} Status: {colored("Ignored", "yellow")}\n'
+                    continue
                 try:
                     response = requests.get(link)
                     if response.status_code >= 400:

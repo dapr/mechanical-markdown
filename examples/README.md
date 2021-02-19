@@ -244,6 +244,18 @@ mm.py -m README.md
 
 Mechanical markdown can optionally check your document for broken external links. It does so by simply making a GET request to any link it finds so long as that link begins with ```http(s)://```. Relative links are not currently supported. Any 2XX or 3XX status code response will be treated as success. Any 4XX or 5XX response will be treated as an error.
 
+If you need a particular link to be ignored while link checking, you can do so by enclosing it within the following annotations:
+
+<!-- IGNORE_LINKS -->
+
+    <!-- IGNORE_LINKS -->
+
+This link should be ignored: [Ignore](https://0.0.0.0/a_bad_link)
+
+    <!-- END_IGNORE -->
+
+<!-- END_IGNORE -->
+
 ```bash
 mm.py -l README.md
 ```
@@ -251,6 +263,7 @@ mm.py -l README.md
 This will append to the report a footer to the runtime report:
 ```
 External link validation:
+        https://0.0.0.0/a_bad_link Status: Ignored
         https://github.com/dapr/quickstarts Status: 200
         https://dapr.io/ Status: 200
 ```
