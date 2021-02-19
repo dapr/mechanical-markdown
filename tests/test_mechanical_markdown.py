@@ -455,6 +455,13 @@ echo "test"
         with self.assertRaises(MarkdownAnnotationError):
             MechanicalMarkdown(test_data)
 
+        test_data = """
+<!-- IGNORE_LINKS -->
+
+"""
+        with self.assertRaises(MarkdownAnnotationError):
+            MechanicalMarkdown(test_data)
+
     def test_missing_extra_tag_throws_exception(self):
         test_data = """
 <!-- STEP
@@ -468,6 +475,17 @@ echo "test"
 <!-- END_STEP -->
 
 <!-- END_STEP -->
+"""
+        with self.assertRaises(MarkdownAnnotationError):
+            MechanicalMarkdown(test_data)
+
+        test_data = """
+<!-- IGNORE_LINKS -->
+
+<!-- END_IGNORE -->
+
+<!-- END_IGNORE -->
+
 """
         with self.assertRaises(MarkdownAnnotationError):
             MechanicalMarkdown(test_data)
@@ -544,5 +562,27 @@ A request to a non-existant host: [Mechanical Markdown](https://0.0.0.0/a_bad_li
 External link validation:
 \thttps://github.com/dapr/mechanical-markdown/a_bad_link Status: {colored('404', 'red')}
 \thttps://0.0.0.0/a_bad_link Status: {colored('Connection Failed', 'red')}
+"""
+        self.assertEqual(expected_report, report)
+
+    def test_link_validation_ignores_links_marked_ignore(self):
+        test_data = """
+A link that should work: [Mechanical Markdown](https://github.com/dapr/mechanical-markdown)
+
+<!-- IGNORE_LINKS -->
+
+This link should be ignored: [Mechanical Markdown](https://0.0.0.0/a_bad_link)
+
+<!-- END_IGNORE -->
+
+"""
+        self.prep_command_ouput("test", "", 0)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.exectute_steps(False, validate_links=True)
+        self.assertTrue(success)
+        expected_report = f"""
+External link validation:
+\thttps://github.com/dapr/mechanical-markdown Status: {colored('200', 'green')}
+\thttps://0.0.0.0/a_bad_link Status: {colored('Ignored', 'yellow')}
 """
         self.assertEqual(expected_report, report)

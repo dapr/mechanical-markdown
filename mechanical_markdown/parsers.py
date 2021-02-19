@@ -14,6 +14,9 @@ from mechanical_markdown.step import Step
 start_token = 'STEP'
 end_token = 'END_STEP'
 
+ignore_links_token = 'IGNORE_LINKS'
+end_ignore_links_token = 'END_IGNORE'
+
 
 class MarkdownAnnotationError(Exception):
     pass
@@ -34,6 +37,7 @@ class RecipeParser(Renderer):
         self.current_step = None
         self.all_steps = []
         self.external_links = []
+        self.ignore_links = False
 
     def block_code(self, text, lang):
         if lang is not None and lang.strip() in ('bash', 'sh') and self.current_step is not None:
@@ -52,6 +56,14 @@ class RecipeParser(Renderer):
             self.current_step = None
             return ""
 
+        elif comment_body.find(ignore_links_token) >= 0:
+            self.ignore_links = True
+
+        elif comment_body.find(end_ignore_links_token) >= 0:
+            if not self.ignore_links:
+                raise MarkdownAnnotationError("Unexpected <!-- {} --> found".format(end_ignore_links_token))
+            self.ignore_links = False
+
         start_pos = comment_body.find(start_token)
 
         if start_pos < 0:
@@ -64,4 +76,4 @@ class RecipeParser(Renderer):
 
     def link(self, link, text=None, title=None):
         if re.match("https?://", link) is not None:
-            self.external_links.append(link)
+            self.external_links.append((link, self.ignore_links))
