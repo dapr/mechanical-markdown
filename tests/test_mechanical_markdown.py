@@ -462,6 +462,41 @@ echo "test"
         with self.assertRaises(MarkdownAnnotationError):
             MechanicalMarkdown(test_data)
 
+    def test_missmatched_start_and_end_tags_throws_exception(self):
+        test_data = """
+<!-- STEP
+name: basic test
+-->
+
+```bash
+echo "test"
+```
+
+<!-- STEP
+name: another basic test
+-->
+
+```bash
+echo "another test"
+```
+
+<!-- END_STEP -->
+
+"""
+        with self.assertRaises(MarkdownAnnotationError):
+            MechanicalMarkdown(test_data)
+
+        test_data = """
+<!-- IGNORE_LINKS -->
+
+<!-- IGNORE_LINKS -->
+
+<!-- END_IGNORE -->
+
+"""
+        with self.assertRaises(MarkdownAnnotationError):
+            MechanicalMarkdown(test_data)
+
     def test_missing_extra_tag_throws_exception(self):
         test_data = """
 <!-- STEP
