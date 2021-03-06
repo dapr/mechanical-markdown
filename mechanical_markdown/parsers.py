@@ -57,6 +57,8 @@ class RecipeParser(Renderer):
             return ""
 
         elif comment_body.find(ignore_links_token) >= 0:
+            if self.ignore_links:
+                raise MarkdownAnnotationError(f"Duplicate <!-- {ignore_links_token} --> found")
             self.ignore_links = True
 
         elif comment_body.find(end_ignore_links_token) >= 0:
@@ -68,6 +70,9 @@ class RecipeParser(Renderer):
 
         if start_pos < 0:
             return ""
+
+        if self.current_step is not None:
+            raise MarkdownAnnotationError(f"<!-- {start_token} --> found while still processing previous step")
 
         start_pos += len(start_token)
         self.current_step = Step(yaml.safe_load(comment_body[start_pos:]))
