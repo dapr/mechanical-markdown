@@ -8,6 +8,7 @@ import requests
 from mistune import Markdown
 from mechanical_markdown.parsers import RecipeParser, end_token, end_ignore_links_token, MarkdownAnnotationError
 from termcolor import colored
+from time import sleep
 
 
 class Recipe:
@@ -18,11 +19,11 @@ class Recipe:
         if parser.current_step is not None:
             raise MarkdownAnnotationError(f'Reached end of input searching for <!-- {end_token} -->')
         if parser.ignore_links:
-            raise MarkdownAnnotationError(f'Reached end of input searching for <!-- {end_ignore_links_token}')
+            raise MarkdownAnnotationError(f'Reached end of input searching for <!-- {end_ignore_links_token} -->')
         self.all_steps = parser.all_steps
         self.external_links = parser.external_links
 
-    def exectute_steps(self, manual, default_shell='bash -c', validate_links=False):
+    def exectute_steps(self, manual, default_shell='bash -c', validate_links=False, link_retries=3):
         success = True
         report = ""
         for step in self.all_steps:
@@ -45,16 +46,24 @@ class Recipe:
                 if ignore:
                     report += f'\t{link} Status: {colored("Ignored", "yellow")}\n'
                     continue
-                try:
-                    response = requests.get(link)
-                    if response.status_code >= 400:
-                        success = False
-                        report += f'\t{link} Status: {colored(response.status_code, "red")}\n'
-                    else:
-                        report += f'\t{link} Status: {colored(response.status_code, "green")}\n'
-                except requests.exceptions.ConnectionError:
-                    success = False
-                    report += f'\t{link} Status: {colored("Connection Failed", "red")}\n'
+                retries = link_retries
+                while retries > 0:
+                    try:
+                        response = requests.get(link)
+                        if response.status_code >= 400:
+                            retries -= 1
+                            if retries == 0:
+                                success = False
+                                report += f'\t{link} Status: {colored(response.status_code, "red")}\n'
+                        else:
+                            report += f'\t{link} Status: {colored(response.status_code, "green")}\n'
+                            break
+                    except requests.exceptions.ConnectionError:
+                        retries -= 1
+                        if retries == 0:
+                            success = False
+                            report += f'\t{link} Status: {colored("Connection Failed", "red")}\n'
+                    sleep(0.5)
 
         return success, report
 

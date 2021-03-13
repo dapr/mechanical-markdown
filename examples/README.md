@@ -92,13 +92,16 @@ For a list of options:
 name: CLI help
 expected_stdout_lines:
   - "usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]"
-  - "             [--validate-links]"
+  - "             [--validate-links] [--link-retries RETRIES]"
   - "             [MARKDOWN_FILE]"
   - "Auto validate markdown documentation"
   - "optional arguments:"
   - "  -h, --help            show this help message and exit"
   - "  --version             Print version and exit"
   - "  --validate-links, -l  Check for broken links to external URLs"
+  - "  --link-retries RETRIES, -r RETRIES"
+  - "                        Number of times to retry broken links [Default: 3]."
+  - "                        Does nothing without -l"
   - "  MARKDOWN_FILE         The annotated markdown file to run/execute"
   - "  --dry-run, -d         Print out the commands we would run based on"
   - "                        markdown_file"
@@ -116,7 +119,7 @@ mm.py --help
 
 ```
 usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]
-             [--validate-links]
+             [--validate-links] [--link-retries RETRIES]"
              [MARKDOWN_FILE]
 
 Auto validate markdown documentation
@@ -125,6 +128,9 @@ optional arguments:
   -h, --help            show this help message and exit
   --version             Print version and exit
   --validate-links, -l  Check for broken links to external URLs
+  --link-retries RETRIES, -r RETRIES
+                        Number of times to retry broken links [Default: 3]."
+                        Does nothing without -l"
 
   MARKDOWN_FILE         The annotated markdown file to run/execute
   --dry-run, -d         Print out the commands we would run based on
@@ -266,6 +272,12 @@ External link validation:
         https://0.0.0.0/a_bad_link Status: Ignored
         https://github.com/dapr/quickstarts Status: 200
         https://dapr.io/ Status: 200
+```
+
+By default broken links will be retried 3 times. You can change the number of retries with:
+
+```bash
+mm.py -l -r 10 README.md
 ```
 
 # More examples:
