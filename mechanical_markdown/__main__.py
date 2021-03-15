@@ -39,6 +39,12 @@ def main():
                             default=False,
                             action='store_true',
                             help='Check for broken links to external URLs')
+    parse_args.add_argument('--link-retries', '-r',
+                            dest='link_retries',
+                            default=3,
+                            metavar='RETRIES',
+                            type=int,
+                            help='Number of times to retry broken links [Default: 3]. Does nothing without -l')
     args = parse_args.parse_args()
 
     if args.print_version:
@@ -57,7 +63,10 @@ def main():
         print(r.dryrun(args.shell_cmd))
         sys.exit(0)
 
-    success, report = r.exectute_steps(args.manual, args.shell_cmd, validate_links=args.validate_links)
+    success, report = r.exectute_steps(args.manual,
+                                       args.shell_cmd,
+                                       validate_links=args.validate_links,
+                                       link_retries=args.link_retries)
     print(report)
     if not success:
         sys.exit(1)
