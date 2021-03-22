@@ -12,8 +12,8 @@ from time import sleep
 
 
 class Recipe:
-    def __init__(self, markdown):
-        parser = RecipeParser()
+    def __init__(self, markdown, shell='bash -c'):
+        parser = RecipeParser(shell)
         md = Markdown(parser, extensions=('fenced-code',))
         md(markdown)
         if parser.current_step is not None:
@@ -23,11 +23,11 @@ class Recipe:
         self.all_steps = parser.all_steps
         self.external_links = parser.external_links
 
-    def exectute_steps(self, manual, default_shell='bash -c', validate_links=False, link_retries=3):
+    def exectute_steps(self, manual, validate_links=False, link_retries=3):
         success = True
         report = ""
         for step in self.all_steps:
-            if not step.run_all_commands(manual, default_shell):
+            if not step.run_all_commands(manual):
                 success = False
                 break
 
@@ -67,9 +67,9 @@ class Recipe:
 
         return success, report
 
-    def dryrun(self, default_shell='bash -c'):
+    def dryrun(self):
         retstr = ""
         for step in self.all_steps:
-            retstr += step.dryrun(default_shell)
+            retstr += step.dryrun()
 
         return retstr

@@ -12,9 +12,11 @@ from termcolor import colored
 
 default_timeout_seconds = 60
 
+VALID_MATCH_MODES = ('exact', 'substring')
+
 
 class Step:
-    def __init__(self, parameters):
+    def __init__(self, parameters, shell):
         self.observed_output = {
                 "stdout": "",
                 "stderr": ""
@@ -34,11 +36,17 @@ class Step:
         self.timeout = default_timeout_seconds if "timeout_seconds" not in parameters else parameters["timeout_seconds"]
         self.env = dict(os.environ, **parameters['env']) if "env" in parameters else os.environ
         self.pause_message = None if "manual_pause_message" not in parameters else parameters["manual_pause_message"]
+        self.match_mode = 'exact' if "output_match_mode" not in parameters else parameters["output_match_mode"]
+        self.shell = shell
+
+        if self.match_mode not in VALID_MATCH_MODES:
+            from mechanical_markdown.parsers import MarkdownAnnotationError
+            raise MarkdownAnnotationError(f'output_match_mode must be one of: {VALID_MATCH_MODES}')
 
     def add_command_block(self, block):
-        self.commands.append(Command(block.strip()))
+        self.commands.append(Command(block.strip(), self.working_dir, self.env, self.shell, self.timeout + self.sleep))
 
-    def run_all_commands(self, manual, shell):
+    def run_all_commands(self, manual):
         if manual and self.pause_message is not None:
             try:
                 while True:
@@ -48,9 +56,9 @@ class Step:
                 pass
 
         for command in self.commands:
-            command.run(self.working_dir, self.env, shell)
+            command.start()
             if not self.background:
-                command.wait_or_timeout(self.timeout)
+                command.wait()
                 if self.expect_return_code is not None and command.return_code != self.expect_return_code:
                     return False
             if self.sleep:
@@ -58,10 +66,10 @@ class Step:
 
         return True
 
-    def dryrun(self, shell):
+    def dryrun(self):
         retstr = "Step: {}\n".format(self.name)
 
-        retstr += "\tcommands to run with '{}':\n".format(shell)
+        retstr += "\tcommands to run with '{}':\n".format(self.shell)
         for c in self.commands:
             retstr += "\t\t`{}`\n".format(c.command)
 
@@ -78,7 +86,7 @@ class Step:
         success = True
         for command in self.commands:
             if self.background:
-                command.wait_or_timeout(self.timeout)
+                command.wait()
                 if self.expect_return_code is not None and command.return_code != self.expect_return_code:
                     success = False
         return success
@@ -99,7 +107,7 @@ class Step:
                 report += "\tcommand: `{}`\n\treturn_code: {}\n".format(c.command, colored(c.return_code, color))
 
         for out in 'stdout', 'stderr':
-            report += "\tExpected {}:\n".format(out)
+            report += "\tExpected {} (output_match_mode: {}):\n".format(out, self.match_mode)
             for expected in self.expected_lines[out]:
                 report += '\t\t' + expected + '\n'
             report += "\tActual {}:\n".format(out)
@@ -107,9 +115,13 @@ class Step:
             for c in self.commands:
                 if c.process is not None:
                     for line in c.output[out].split("\n"):
-                        if len(self.expected_lines[out]) and self.expected_lines[out][0] == line:
-                            report += "\t\t{}\n".format(colored(line, 'green'))
-                            self.expected_lines[out] = self.expected_lines[out][1:]
+                        if len(self.expected_lines[out]):
+                            if self.expected_lines[out][0] == line or (
+                               self.match_mode == 'substring' and self.expected_lines[out][0] in line):
+                                report += "\t\t{}\n".format(colored(line, 'green'))
+                                self.expected_lines[out] = self.expected_lines[out][1:]
+                            else:
+                                report += "\t\t{}\n".format(line)
                         else:
                             report += "\t\t{}\n".format(line)
 

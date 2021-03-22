@@ -56,6 +56,38 @@ echo "error" 1>&2
 
 <!-- END_STEP -->
 
+## Match mode
+
+You can specify the output matching strategy with the `output_match_mode` directive. 
+
+There are two supported line validation types `exact` and `substring`. These do as their names suggest, with `exact` requiring the entire line of output to match, and `substring` requires only part of the line to match. The default is `exact`.
+
+<!-- STEP
+name: Exact match
+output_match_mode: exact
+expected_stdout_lines:
+  - "Match this entire line"
+-->
+
+```bash
+echo "Match this entire line"
+```
+
+<!-- END_STEP -->
+
+<!-- STEP
+name: Partial match
+output_match_mode: substring
+expected_stdout_lines:
+  - "partial string"
+-->
+
+```bash
+echo "Match partial string"
+```
+
+<!-- END_STEP -->
+
 ## Checking return code
 
 By default, all code blocks are expected to return 0. You can change this behavior with the directive ```expected_return_code```:
