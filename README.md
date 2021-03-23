@@ -1,7 +1,6 @@
 # Mechanical Markdown
 
 [![PyPI version](https://badge.fury.io/py/mechanical-markdown.svg)](https://badge.fury.io/py/mechanical-markdown)
-
 [![codecov](https://codecov.io/gh/dapr/mechanical-markdown/branch/main/graph/badge.svg)](https://codecov.io/gh/dapr/mechanical-markdown)
 
 If you are using markdown to create tutorials for your users, these markdown files will often be a series of shell commands that a user will copy and paste into their shell of choice, along with detailed text description of what each command is doing.
