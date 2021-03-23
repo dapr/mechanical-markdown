@@ -151,17 +151,16 @@ echo "test"
 """
         self.prep_command_ouput("test", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success = mm.all_steps[0].run_all_commands(False, "bash -c")
+        success = mm.all_steps[0].run_all_commands(False)
+        self.assertTrue(success)
+        success = mm.all_steps[0].wait_for_all_background_commands()
         self.assertTrue(success)
         self.popen_mock.assert_called_with(['bash', '-c', 'echo "test"'],
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
                                            env=os.environ)
-        self.process_mock.communicate.assert_not_called()
 
-        success = mm.all_steps[0].wait_for_all_background_commands()
-        self.assertTrue(success)
         self.process_mock.communicate.assert_called_with(timeout=60)
 
     def test_background_failure(self):
@@ -179,17 +178,16 @@ echo "test"
 """
         self.prep_command_ouput("test", "", 1)
         mm = MechanicalMarkdown(test_data)
-        success = mm.all_steps[0].run_all_commands(False, "bash -c")
+        success = mm.all_steps[0].run_all_commands(False)
         self.assertTrue(success)
+        success = mm.all_steps[0].wait_for_all_background_commands()
+        self.assertFalse(success)
         self.popen_mock.assert_called_with(['bash', '-c', 'echo "test"'],
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
                                            env=os.environ)
-        self.process_mock.communicate.assert_not_called()
 
-        success = mm.all_steps[0].wait_for_all_background_commands()
-        self.assertFalse(success)
         self.process_mock.communicate.assert_called_with(timeout=60)
 
     def test_failure_halts_further_executions(self):
@@ -207,6 +205,20 @@ echo "test2"
 ```
 
 <!-- END_STEP -->
+
+<!-- STEP
+name: should not be executed
+background: true
+-->
+
+We had a bug where we were calling join() on threads that never actually got executed. This test tickles that bug.
+
+```bash
+echo "This should not be executed"
+```
+
+<!-- END_STEP -->
+
 """
         self.prep_command_ouput("test", "", 1)
         self.prep_command_ouput("test2", "", 0)
@@ -273,6 +285,47 @@ echo "error" 1>&2
                       env=os.environ),
                  call().communicate(timeout=60)]
         self.popen_mock.assert_has_calls(calls)
+
+    def test_expected_lines_succeed_when_matched_substr(self):
+        test_data = """
+<!-- STEP
+name: basic test
+output_match_mode: substring
+expected_stdout_lines:
+  - substring
+expected_stderr_lines:
+-->
+
+```bash
+echo "Match a substring"
+```
+
+<!-- END_STEP -->
+"""
+        self.prep_command_ouput("Match a substring", "", 0)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.exectute_steps(False)
+        self.assertTrue(success)
+        calls = [call(['bash', '-c', 'echo "Match a substring"'],
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      universal_newlines=True,
+                      env=os.environ),
+                 call().communicate(timeout=60)]
+        self.popen_mock.assert_has_calls(calls)
+
+    def test_exception_raised_for_invalid_match_mode(self):
+        test_data = """
+<!-- STEP
+name: basic test
+output_match_mode: foo
+-->
+
+<!-- END_STEP -->
+"""
+
+        with self.assertRaises(MarkdownAnnotationError):
+            MechanicalMarkdown(test_data)
 
     def test_timeout_is_respected(self):
         test_data = """
@@ -431,8 +484,8 @@ echo "test"
 <!-- END_STEP -->
 """
         self.prep_command_ouput("test", "", 0)
-        mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False, default_shell='cmd /c')
+        mm = MechanicalMarkdown(test_data, shell='cmd /c')
+        success, report = mm.exectute_steps(False)
         self.assertTrue(success)
         self.popen_mock.assert_called_with(['cmd', '/c', 'echo "test"'],
                                            stdout=subprocess.PIPE,

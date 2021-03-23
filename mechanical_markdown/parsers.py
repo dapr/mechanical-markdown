@@ -32,12 +32,13 @@ class HTMLCommentParser(HTMLParser):
 
 
 class RecipeParser(Renderer):
-    def __init__(self, **kwargs):
+    def __init__(self, shell, **kwargs):
         super().__init__(**kwargs)
         self.current_step = None
         self.all_steps = []
         self.external_links = []
         self.ignore_links = False
+        self.shell = shell
 
     def block_code(self, text, lang):
         if lang is not None and lang.strip() in ('bash', 'sh') and self.current_step is not None:
@@ -75,7 +76,7 @@ class RecipeParser(Renderer):
             raise MarkdownAnnotationError(f"<!-- {start_token} --> found while still processing previous step")
 
         start_pos += len(start_token)
-        self.current_step = Step(yaml.safe_load(comment_body[start_pos:]))
+        self.current_step = Step(yaml.safe_load(comment_body[start_pos:]), self.shell)
 
         return ""
 

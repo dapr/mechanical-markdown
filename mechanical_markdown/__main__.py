@@ -6,8 +6,9 @@ Licensed under the MIT License.
 
 import mechanical_markdown
 
-import sys
 import argparse
+import colorama
+import sys
 
 
 def main():
@@ -55,16 +56,19 @@ def main():
                          Try "{} -h" for more info'.format(parse_args.prog))
 
     body = args.markdown_file.read()
-    r = mechanical_markdown.MechanicalMarkdown(body)
+
+    # Enable color terminal support on Windows
+    colorama.init()
+
+    r = mechanical_markdown.MechanicalMarkdown(body, shell=args.shell_cmd)
     success = True
 
     if args.dry_run:
         print("Would run the following validation steps:")
-        print(r.dryrun(args.shell_cmd))
+        print(r.dryrun())
         sys.exit(0)
 
     success, report = r.exectute_steps(args.manual,
-                                       args.shell_cmd,
                                        validate_links=args.validate_links,
                                        link_retries=args.link_retries)
     print(report)
