@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - v*
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -38,7 +40,7 @@ jobs:
     - name: Upload test coverage
       uses: codecov/codecov-action@v1
     - name: Build and publish mechanical-markdown
-      if: github.event_name != 'pull_request'
+      if: startswith(github.ref, 'refs/tags/v')
       run: |
         python setup.py sdist bdist_wheel
         twine upload dist/*
