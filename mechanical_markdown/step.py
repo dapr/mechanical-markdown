@@ -10,7 +10,7 @@ import time
 from mechanical_markdown.command import Command
 from termcolor import colored
 
-default_timeout_seconds = 60
+default_timeout_seconds = 300
 
 VALID_MATCH_MODES = ('exact', 'substring')
 
