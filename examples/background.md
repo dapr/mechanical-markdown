@@ -52,7 +52,7 @@ echo "Second step"
 
 ## Backgrounding
 
-Conversely, if you want to run a step in the background without waiting to move on to the next step. This is great for starting services or daemons that you will clean up later on in the procedure. All backgrounded steps will be waited for at the end of execution so that stdout and stderr and the return code can all be checked. If a processes hasn't finished it will be timed out after 60s by default. See Timeout section below for more info.
+Conversely, if you want to run a step in the background without waiting to move on to the next step. This is great for starting services or daemons that you will clean up later on in the procedure. All backgrounded steps will be waited for at the end of execution so that stdout and stderr and the return code can all be checked. If a processes hasn't finished it will be timed out after 300s by default. See Timeout section below for more info.
 
 In this first step, run a command that will take at least 5 seconds, but mm.py doesn't wait for it before executing the next step.
 
@@ -87,7 +87,7 @@ date
 
 ## Timeouts
 
-By default, all commands timeout after 60s. They will receive a SIGTERM, followed by a SIGKILL. Script that reach their timeout and are killed will cause validation to fail and mm.py will return non-zero. You can change the duration of the timeout for an individual step by setting ```timeout_seconds``` .
+By default, all commands timeout after 300s. They will receive a SIGTERM, followed by a SIGKILL. Script that reach their timeout and are killed will cause validation to fail and mm.py will return non-zero. You can change the duration of the timeout for an individual step by setting ```timeout_seconds``` .
 
 > **Note:** sleep time does not count towards timeout_seconds.
 

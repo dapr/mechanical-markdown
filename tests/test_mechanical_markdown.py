@@ -11,6 +11,8 @@ import unittest
 from mechanical_markdown import MechanicalMarkdown, MarkdownAnnotationError
 from unittest.mock import patch, MagicMock, call
 
+DEFAULT_TIMEOUT = 300
+
 
 class MechanicalMarkdownTests(unittest.TestCase):
     def setUp(self):
@@ -161,7 +163,7 @@ echo "test"
                                            universal_newlines=True,
                                            env=os.environ)
 
-        self.process_mock.communicate.assert_called_with(timeout=60)
+        self.process_mock.communicate.assert_called_with(timeout=DEFAULT_TIMEOUT)
 
     def test_background_failure(self):
         test_data = """
@@ -188,7 +190,7 @@ echo "test"
                                            universal_newlines=True,
                                            env=os.environ)
 
-        self.process_mock.communicate.assert_called_with(timeout=60)
+        self.process_mock.communicate.assert_called_with(timeout=DEFAULT_TIMEOUT)
 
     def test_failure_halts_further_executions(self):
         test_data = """
@@ -283,7 +285,7 @@ echo "error" 1>&2
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
                       env=os.environ),
-                 call().communicate(timeout=60)]
+                 call().communicate(timeout=DEFAULT_TIMEOUT)]
         self.popen_mock.assert_has_calls(calls)
 
     def test_expected_lines_succeed_when_matched_substr(self):
@@ -311,7 +313,7 @@ echo "Match a substring"
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
                       env=os.environ),
-                 call().communicate(timeout=60)]
+                 call().communicate(timeout=DEFAULT_TIMEOUT)]
         self.popen_mock.assert_has_calls(calls)
 
     def test_exception_raised_for_invalid_match_mode(self):
@@ -427,7 +429,7 @@ echo "test"
 <!-- END_STEP -->
 """
 
-        def raise_timeout(timeout=60):
+        def raise_timeout(timeout=DEFAULT_TIMEOUT):
             raise subprocess.TimeoutExpired("foo", 60.0)
 
         self.process_mock.communicate.side_effect = raise_timeout
@@ -442,7 +444,7 @@ echo "test"
                                            env=os.environ)
         self.process_mock.terminate.assert_called()
         self.process_mock.kill.assert_called()
-        self.process_mock.communicate.assert_has_calls([call(timeout=60), call(timeout=60)])
+        self.process_mock.communicate.assert_has_calls([call(timeout=DEFAULT_TIMEOUT), call(timeout=DEFAULT_TIMEOUT)])
 
     @patch("builtins.input")
     def test_pause_waits_for_user_input(self, input_mock):
@@ -611,7 +613,7 @@ exit 15
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
                       env=os.environ),
-                 call().communicate(timeout=60),
+                 call().communicate(timeout=DEFAULT_TIMEOUT),
                  call(['bash', '-c', 'exit 15'],
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
