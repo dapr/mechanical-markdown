@@ -8,6 +8,7 @@ import mechanical_markdown
 
 import argparse
 import colorama
+import platform
 import sys
 
 
@@ -58,7 +59,9 @@ def main():
     body = args.markdown_file.read()
 
     # Enable color terminal support on Windows
-    colorama.init()
+    # The colorama.init() call is supposed to be a no-op on Linux, but calling it breaks color output on github actions
+    if platform.system() == 'Windows':
+        colorama.init()
 
     r = mechanical_markdown.MechanicalMarkdown(body, shell=args.shell_cmd)
     success = True
