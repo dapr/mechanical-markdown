@@ -92,7 +92,7 @@ For a list of options:
 name: CLI help
 expected_stdout_lines:
   - "usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]"
-  - "             [--validate-links] [--link-retries RETRIES]"
+  - "             [--validate-links] [--link-retries RETRIES] [--tags TAGS]"
   - "             [MARKDOWN_FILE]"
   - "Auto validate markdown documentation"
   - "optional arguments:"

@@ -47,6 +47,12 @@ def main():
                             metavar='RETRIES',
                             type=int,
                             help='Number of times to retry broken links [Default: 3]. Does nothing without -l')
+    parse_args.add_argument('--tags', '-t',
+                            dest='tags',
+                            default=[],
+                            action="append",
+                            type=str,
+                            help='Tags used to filter steps')
     args = parse_args.parse_args()
 
     if args.print_version:
@@ -73,7 +79,8 @@ def main():
 
     success, report = r.exectute_steps(args.manual,
                                        validate_links=args.validate_links,
-                                       link_retries=args.link_retries)
+                                       link_retries=args.link_retries,
+                                       tags=args.tags)
     print(report)
     if not success:
         sys.exit(1)

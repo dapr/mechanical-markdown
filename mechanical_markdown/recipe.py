@@ -23,15 +23,16 @@ class Recipe:
         self.all_steps = parser.all_steps
         self.external_links = parser.external_links
 
-    def exectute_steps(self, manual, validate_links=False, link_retries=3):
+    def exectute_steps(self, manual, validate_links=False, link_retries=3, tags=[]):
         success = True
         report = ""
-        for step in self.all_steps:
+        stepsToRun = list(filter(lambda step: self.filter_steps(tags, step), self.all_steps))
+        for step in stepsToRun:
             if not step.run_all_commands(manual):
                 success = False
                 break
 
-        for step in self.all_steps:
+        for step in stepsToRun:
             if not step.wait_for_all_background_commands():
                 success = False
 
@@ -73,3 +74,13 @@ class Recipe:
             retstr += step.dryrun()
 
         return retstr
+
+    def filter_steps(self, tags, step):
+        if len(tags) == 0 or len(step.tags) == 0:
+            return True
+
+        for tag in tags:
+            if tag in step.tags:
+                return True
+
+        return False
