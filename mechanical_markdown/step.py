@@ -37,6 +37,7 @@ class Step:
         self.env = dict(os.environ, **parameters['env']) if "env" in parameters else os.environ
         self.pause_message = None if "manual_pause_message" not in parameters else parameters["manual_pause_message"]
         self.match_mode = 'exact' if "output_match_mode" not in parameters else parameters["output_match_mode"]
+        self.tags = [] if "tags" not in parameters else parameters["tags"]
         self.shell = shell
 
         if self.match_mode not in VALID_MATCH_MODES:

@@ -620,3 +620,89 @@ exit 15
                       universal_newlines=True,
                       env=os.environ)]
         self.popen_mock.assert_has_calls(calls)
+
+    def test_steps_with_no_matching_tags_are_skipped(self):
+        test_data = """
+<!-- STEP
+name: foo bar
+tags:
+  - foo
+  - bar
+-->
+
+```bash
+echo tag foo
+echo tag bar
+```
+
+<!-- END_STEP -->
+
+<!-- STEP
+name: tag match
+tags:
+  - blag
+-->
+
+```bash
+echo blag
+```
+
+<!-- END_STEP -->
+"""
+        self.prep_command_ouput("blag", "", 0)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.exectute_steps(False, tags=("blag",))
+        self.assertTrue(success, report)
+        calls = [call(['bash', '-c', 'echo blag'],
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      universal_newlines=True,
+                      env=os.environ),
+                 call().communicate(timeout=DEFAULT_TIMEOUT)]
+        self.popen_mock.assert_has_calls(calls)
+
+    def test_all_steps_with_matching_tags_are_executed(self):
+        test_data = """
+<!-- STEP
+name: foo bar
+tags:
+  - foo
+  - bar
+-->
+
+```bash
+echo tag foo
+echo tag bar
+```
+
+<!-- END_STEP -->
+
+<!-- STEP
+name: foo2
+tags:
+  - foo
+-->
+
+```bash
+echo foo2
+```
+
+<!-- END_STEP -->
+"""
+        self.prep_command_ouput("tag foo\ntag bar", "", 0)
+        self.prep_command_ouput("foo2", "", 0)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.exectute_steps(False)
+        self.assertTrue(success)
+        calls = [call(['bash', '-c', 'echo tag foo\necho tag bar'],
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      universal_newlines=True,
+                      env=os.environ),
+                 call().communicate(timeout=DEFAULT_TIMEOUT),
+                 call(['bash', '-c', 'echo foo2'],
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      universal_newlines=True,
+                      env=os.environ)]
+        self.popen_mock.assert_has_calls(calls)

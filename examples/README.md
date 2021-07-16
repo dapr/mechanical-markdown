@@ -92,7 +92,7 @@ For a list of options:
 name: CLI help
 expected_stdout_lines:
   - "usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]"
-  - "             [--validate-links] [--link-retries RETRIES]"
+  - "             [--validate-links] [--link-retries RETRIES] [--tags TAGS]"
   - "             [MARKDOWN_FILE]"
   - "Auto validate markdown documentation"
   - "optional arguments:"
@@ -102,6 +102,8 @@ expected_stdout_lines:
   - "  --link-retries RETRIES, -r RETRIES"
   - "                        Number of times to retry broken links [Default: 3]."
   - "                        Does nothing without -l"
+  - "  --tags TAGS, -t TAGS  Tags used to filter steps"
+
   - "  MARKDOWN_FILE         The annotated markdown file to run/execute"
   - "  --dry-run, -d         Print out the commands we would run based on"
   - "                        markdown_file"
@@ -129,9 +131,10 @@ optional arguments:
   --version             Print version and exit
   --validate-links, -l  Check for broken links to external URLs
   --link-retries RETRIES, -r RETRIES
-                        Number of times to retry broken links [Default: 3]."
-                        Does nothing without -l"
-
+                        Number of times to retry broken links [Default: 3].
+                        Does nothing without -l
+  --tags TAGS, -t TAGS  Tags used to filter steps
+  
   MARKDOWN_FILE         The annotated markdown file to run/execute
   --dry-run, -d         Print out the commands we would run based on
                         markdown_file
@@ -220,6 +223,15 @@ Step: Hello World
 If anything unexpected happens, you will get report
 of what went wrong, and mm.py will return non-zero.
 
+### Tags
+
+You can use the `--tags` argument to run only steps marked with the given tags. You may specify multiple tags and any steps that match one or more tags will be run. See [Tagging](tagging.md)
+
+```bash
+mm.py -t tag1 -t tag2 README.md
+```
+
+
 ### Shells
 
 The default shell used to execute scripts is ```bash -c```. You can use a different shell interpreter by specifying one via the cli:
@@ -285,5 +297,6 @@ mm.py -l -r 10 README.md
 - For more details on checking stdout/stderr: [I/O Validation](io.md)
 - For more details on setting up the execution environment: [Environment Variables](env.md) and [Working Directory](working_dir.md)
 - For controlling timeouts, backgrounding, and adding delay between steps: [Sleeping, Timeouts, and Backgrounding](background.md)
+- For tagging and executing a subset of steps: [Tagging](tagging.md)
 
 This tool was written to support the [Dapr Quickstarts](https://github.com/dapr/quickstarts). Be sure to check out [Dapr](https://dapr.io/)!
