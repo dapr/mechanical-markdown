@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_VER: 3.7
-      TWINE_USERNAME: "__token__"
-      TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ env.PYTHON_VER }}
@@ -41,6 +39,9 @@ jobs:
       uses: codecov/codecov-action@v1
     - name: Build and publish mechanical-markdown
       if: startswith(github.ref, 'refs/tags/v')
+      env:
+        TWINE_USERNAME: "__token__"
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       run: |
         python setup.py sdist bdist_wheel
         twine upload dist/*
