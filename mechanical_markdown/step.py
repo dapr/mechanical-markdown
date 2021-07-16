@@ -105,7 +105,9 @@ class Step:
                     color = 'yellow'
                 elif c.return_code != self.expect_return_code:
                     color = 'red'
-                report += "\tcommand: `{}`\n\treturn_code: {}\n".format(c.command, colored(c.return_code, color))
+                report += f"\tcommand: `{c.command}`\n"
+                report += f"\treturn_code: {colored(c.return_code, color)}\n"
+                report += f"\tduration_seconds: {c.duration_seconds:.{3}}\n"
 
         for out in 'stdout', 'stderr':
             report += "\tExpected {} (output_match_mode: {}):\n".format(out, self.match_mode)
