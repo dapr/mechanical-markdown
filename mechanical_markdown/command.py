@@ -22,6 +22,8 @@ class Command(Thread):
         self.shell = shell
         self.timeout = timeout
         self.cwd = cwd
+        self.start_time = 0
+        self.duration_seconds = 0.0
 
     def _wait_or_timeout(self):
         try:
@@ -36,6 +38,7 @@ class Command(Thread):
                 pass
 
         self.return_code = self.process.returncode
+        self.duration_seconds = time.time() - self.start_time
 
     def run(self):
         args_list = self.shell.split()
@@ -43,6 +46,7 @@ class Command(Thread):
         pwd = os.getcwd()
         os.chdir(self.cwd)
         print("Running shell '{}' with command: `{}`".format(self.shell, self.command))
+        self.start_time = time.time()
         self.process = Popen(args_list, universal_newlines=True, stdout=PIPE, stderr=PIPE, env=self.env)
         os.chdir(pwd)
 
