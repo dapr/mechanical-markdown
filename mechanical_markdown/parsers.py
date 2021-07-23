@@ -41,7 +41,7 @@ class RecipeParser(Renderer):
         self.shell = shell
 
     def block_code(self, text, lang):
-        if lang is not None and lang.strip() in ('bash', 'sh') and self.current_step is not None:
+        if lang is not None and lang.strip() in ('bash', 'sh', 'shell-script', 'shell') and self.current_step is not None:
             self.current_step.add_command_block(text)
         return ""
 
