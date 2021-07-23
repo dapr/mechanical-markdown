@@ -29,7 +29,7 @@ To tell mechanical-markdown what parts of your document need to be executed as c
       - "Hello World!"
     -->
     
-    You can use regular markdown anywhere during a step. It will be ignored. Only denoted as bash or sh will be executed.
+    You can use regular markdown anywhere during a step. It will be ignored. Only denoted as bash, sh, shell or shell-script will be executed.
     
     ```bash
     echo "Hello World!"
