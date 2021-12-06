@@ -14,7 +14,7 @@ from time import sleep
 class Recipe:
     def __init__(self, markdown, shell='bash -c'):
         parser = RecipeParser(shell)
-        md = Markdown(parser, extensions=('fenced-code',))
+        md = Markdown(parser)
         md(markdown)
         if parser.current_step is not None:
             raise MarkdownAnnotationError(f'Reached end of input searching for <!-- {end_token} -->')
