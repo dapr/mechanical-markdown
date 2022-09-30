@@ -23,7 +23,7 @@ class Recipe:
         self.all_steps = parser.all_steps
         self.external_links = parser.external_links
 
-    def exectute_steps(self, manual, validate_links=False, link_retries=3, tags=[]):
+    def execute_steps(self, manual, validate_links=False, link_retries=3, tags=[]):
         success = True
         report = ""
         stepsToRun = list(filter(lambda step: self.filter_steps(tags, step), self.all_steps))

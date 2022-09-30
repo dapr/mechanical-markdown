@@ -31,7 +31,7 @@ Relative links not currently supported: [Relative Link](examples/README.md)
 """
         self.server.set_response_codes((200, 204))
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False, validate_links=True)
+        success, report = mm.execute_steps(False, validate_links=True)
         self.assertTrue(success)
         expected_report = f"""
 External link validation:
@@ -47,7 +47,7 @@ A request to a non-existant host: [Mechanical Markdown](https://0.0.0.0/a_bad_li
 """
         mm = MechanicalMarkdown(test_data)
         self.server.set_response_codes((404, ))
-        success, report = mm.exectute_steps(False, validate_links=True, link_retries=1)
+        success, report = mm.execute_steps(False, validate_links=True, link_retries=1)
         self.assertFalse(success)
         expected_report = f"""
 External link validation:
@@ -69,7 +69,7 @@ This link should be ignored: [Mechanical Markdown](https://0.0.0.0/a_bad_link)
 """
         mm = MechanicalMarkdown(test_data)
         self.server.set_response_codes((200, ))
-        success, report = mm.exectute_steps(False, validate_links=True)
+        success, report = mm.execute_steps(False, validate_links=True)
         self.assertTrue(success)
         expected_report = f"""
 External link validation:
@@ -85,7 +85,7 @@ A flaky link: [Mechanical Markdown](http://{self.host_port}/dapr/mechanical-mark
 """
         mm = MechanicalMarkdown(test_data)
         self.server.set_response_codes((503, 503, 200))
-        success, report = mm.exectute_steps(False, validate_links=True)
+        success, report = mm.execute_steps(False, validate_links=True)
         self.assertTrue(success)
         expected_report = f"""
 External link validation:
