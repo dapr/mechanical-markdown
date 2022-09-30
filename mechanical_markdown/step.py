@@ -99,6 +99,13 @@ class Step:
                     success = False
         return success
 
+    @classmethod
+    def find_substring_in_list(cls, expected, lines):
+        for idx, line in enumerate(lines):
+            if expected in line:
+                return idx
+        return -1
+
     def validate_and_report(self):
         success = True
         report = ""
@@ -144,11 +151,11 @@ class Step:
                     else:
                         not_found[out].append(expected)
                 elif self.match_mode == 'substring':
-                    if any((found_idx := idx) >= 0 and expected in output_line
-                            for idx, output_line in enumerate(output_lines_copy)):
+                    idx = Step.find_substring_in_list(expected, output_lines_copy)
+                    if idx >= 0:
                         # remove the line so it can't be matched again, but keep the index
-                        output_lines_copy[found_idx] = ""
-                        output_found_markers.append(found_idx)
+                        output_lines_copy[idx] = ""
+                        output_found_markers.append(idx)
                     else:
                         not_found[out].append(expected)
 
