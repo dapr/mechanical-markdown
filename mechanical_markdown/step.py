@@ -117,7 +117,8 @@ class Step:
                 report += f"\tduration_seconds: {c.duration_seconds:.{3}}\n"
 
         for out in 'stdout', 'stderr':
-            report += "\tExpected {} (output_match_mode: {}):\n".format(out, self.match_mode)
+            report += "\tExpected {} (output_match_mode: {}, match_order: {}):\n".format(
+                out, self.match_mode, self.match_order)
             for expected in self.expected_lines[out]:
                 report += '\t\t' + expected + '\n'
             report += "\tActual {}:\n".format(out)
@@ -125,30 +126,40 @@ class Step:
             not_found = {"stdout": [], "stderr": []}  # lines that were expected but not found
             output_found_markers = []  # index of lines that were found in the output
 
+            # Gather output from all commands
+            output_lines = []
             for c in self.commands:
                 if c.process is not None:
-                    output_lines = c.output[out].split("\n")
-                    for expected in self.expected_lines[out]:
-                        if self.match_mode == 'exact':
-                            if expected in output_lines:
-                                output_found_markers.append(output_lines.index(expected))
-                            else:
-                                not_found[out].append(expected)
-                        elif self.match_mode == 'substring':
-                            if any((found_idx := idx) >= 0 and expected in output_line
-                                   for idx, output_line in enumerate(output_lines)):
-                                output_found_markers.append(found_idx)
-                            else:
-                                not_found[out].append(expected)
+                    output_lines += c.output[out].split("\n")
 
-                    for idx, line in enumerate(output_lines):
-                        if idx in output_found_markers:
-                            report += "\t\t{}\n".format(colored(line, 'green'))
-                        else:
-                            report += "\t\t{}\n".format(line)
+            # Find expected lines in the output
+            output_lines_copy = output_lines[:]
+            for expected in self.expected_lines[out]:
+                if self.match_mode == 'exact':
+                    if expected in output_lines_copy:
+                        idx = output_lines_copy.index(expected)
+                        # remove the line so it can't be matched again, but keep the index
+                        output_lines_copy[idx] = ""
+                        output_found_markers.append(idx)
+                    else:
+                        not_found[out].append(expected)
+                elif self.match_mode == 'substring':
+                    if any((found_idx := idx) >= 0 and expected in output_line
+                            for idx, output_line in enumerate(output_lines_copy)):
+                        # remove the line so it can't be matched again, but keep the index
+                        output_lines_copy[found_idx] = ""
+                        output_found_markers.append(found_idx)
+                    else:
+                        not_found[out].append(expected)
+
+            for idx, line in enumerate(output_lines):
+                if idx in output_found_markers:
+                    report += "\t\t{}\n".format(colored(line, 'green'))
+                else:
+                    report += "\t\t{}\n".format(line)
 
             if self.match_order == 'sequential' and sorted(output_found_markers) != output_found_markers:
-                report += colored("\t\tERROR expected lines were not found in the correct order", 'red') + "\n"
+                report += colored("\tERROR expected lines were not found in the correct order", 'red') + "\n"
                 success = False
 
             if len(not_found[out]):
