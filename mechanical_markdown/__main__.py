@@ -77,10 +77,10 @@ def main():
         print(r.dryrun())
         sys.exit(0)
 
-    success, report = r.exectute_steps(args.manual,
-                                       validate_links=args.validate_links,
-                                       link_retries=args.link_retries,
-                                       tags=args.tags)
+    success, report = r.execute_steps(args.manual,
+                                      validate_links=args.validate_links,
+                                      link_retries=args.link_retries,
+                                      tags=args.tags)
     print(report)
     if not success:
         sys.exit(1)

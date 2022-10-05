@@ -16,12 +16,12 @@ DEFAULT_TIMEOUT = 300
 
 class MechanicalMarkdownTests(unittest.TestCase):
     def setUp(self):
-        self.command_ouputs = []
+        self.command_outputs = []
 
         self.process_mock = MagicMock()
 
         def pop_command(timeout=None):
-            stdout, stderr, return_code = self.command_ouputs.pop(0)
+            stdout, stderr, return_code = self.command_outputs.pop(0)
             self.process_mock.returncode = return_code
             return (stdout, stderr)
 
@@ -33,8 +33,8 @@ class MechanicalMarkdownTests(unittest.TestCase):
         self.patcher = patch('mechanical_markdown.command.Popen', self.popen_mock)
         self.patcher.start()
 
-    def prep_command_ouput(self, stdout, stderr, return_code):
-        self.command_ouputs.append((stdout, stderr, return_code))
+    def prep_command_output(self, stdout, stderr, return_code):
+        self.command_outputs.append((stdout, stderr, return_code))
 
     def tearDown(self):
         self.patcher.stop()
@@ -51,9 +51,9 @@ echo "test"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         self.popen_mock.assert_called_with(['bash', '-c', 'echo "test"'],
                                            stdout=subprocess.PIPE,
@@ -75,9 +75,9 @@ echo "test"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         self.popen_mock.assert_called_with(['bash', '-c', 'echo "test"'],
                                            stdout=subprocess.PIPE,
@@ -100,9 +100,9 @@ echo "test"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         self.popen_mock.assert_called_with(['bash', '-c', 'echo "test"'],
                                            stdout=subprocess.PIPE,
@@ -128,9 +128,9 @@ echo "test"
 """
 
         expected_env = {"ENVA": "foo", "ENVB": "bar"}
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         self.popen_mock.assert_called_with(['bash', '-c', 'echo "test"'],
                                            stdout=subprocess.PIPE,
@@ -151,7 +151,7 @@ echo "test"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
         success = mm.all_steps[0].run_all_commands(False)
         self.assertTrue(success)
@@ -178,7 +178,7 @@ echo "test"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 1)
+        self.prep_command_output("test", "", 1)
         mm = MechanicalMarkdown(test_data)
         success = mm.all_steps[0].run_all_commands(False)
         self.assertTrue(success)
@@ -222,10 +222,10 @@ echo "This should not be executed"
 <!-- END_STEP -->
 
 """
-        self.prep_command_ouput("test", "", 1)
-        self.prep_command_ouput("test2", "", 0)
+        self.prep_command_output("test", "", 1)
+        self.prep_command_output("test2", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertFalse(success)
         self.popen_mock.assert_called_once_with(['bash', '-c', 'echo "test"'],
                                                 stdout=subprocess.PIPE,
@@ -247,9 +247,9 @@ echo "test"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertFalse(success)
         self.popen_mock.assert_called_once_with(['bash', '-c', 'echo "test"'],
                                                 stdout=subprocess.PIPE,
@@ -276,9 +276,9 @@ echo "error" 1>&2
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test\ntest2", "error", 0)
+        self.prep_command_output("test\ntest2", "error", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         calls = [call(['bash', '-c', 'echo "test"\necho "test2"\necho "error" 1>&2'],
                       stdout=subprocess.PIPE,
@@ -304,9 +304,9 @@ echo "Match a substring"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("Match a substring", "", 0)
+        self.prep_command_output("Match a substring", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         calls = [call(['bash', '-c', 'echo "Match a substring"'],
                       stdout=subprocess.PIPE,
@@ -315,6 +315,52 @@ echo "Match a substring"
                       env=os.environ),
                  call().communicate(timeout=DEFAULT_TIMEOUT)]
         self.popen_mock.assert_has_calls(calls)
+
+    def test_expected_lines_succeed_when_matched_order(self):
+        test_data = """
+<!-- STEP
+    name: match order {0} test
+    match_order: {0}
+    expected_stdout_lines:
+    - 'line 1'
+    - 'line 2'
+-->
+
+```bash
+echo "line 2"
+echo "line 1"
+```
+
+<!-- END_STEP -->
+    """
+        for match_order in ("sequential", "none"):
+            self.prep_command_output("line 2\nline 1", "", 0)
+            mm = MechanicalMarkdown(test_data.format(match_order))
+            success, _ = mm.execute_steps(False)
+            if match_order == "sequential":
+                self.assertFalse(success, "sequential match order should fail")
+            else:
+                self.assertTrue(success, "none match order should succeed")
+            calls = [call(['bash', '-c', 'echo "line 2"\necho "line 1"'],
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE,
+                          universal_newlines=True,
+                          env=os.environ),
+                     call().communicate(timeout=DEFAULT_TIMEOUT)]
+            self.popen_mock.assert_has_calls(calls)
+
+    def test_exception_raised_for_invalid_match_order(self):
+        test_data = """
+<!-- STEP
+name: basic test
+match_order: foo
+-->
+
+<!-- END_STEP -->
+"""
+
+        with self.assertRaises(MarkdownAnnotationError):
+            MechanicalMarkdown(test_data)
 
     def test_exception_raised_for_invalid_match_mode(self):
         test_data = """
@@ -344,9 +390,9 @@ echo "test"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         calls = [call(['bash', '-c', 'echo "test"'],
                       stdout=subprocess.PIPE,
@@ -387,7 +433,7 @@ echo "bar" >2
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
         output = mm.dryrun()
 
@@ -433,9 +479,9 @@ echo "test"
             raise subprocess.TimeoutExpired("foo", 60.0)
 
         self.process_mock.communicate.side_effect = raise_timeout
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertFalse(success)
         self.popen_mock.assert_called_with(['bash', '-c', 'echo "test"'],
                                            stdout=subprocess.PIPE,
@@ -461,10 +507,10 @@ echo "test"
 <!-- END_STEP -->
 """
 
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         input_mock.return_value = 'x'
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(True)
+        success, report = mm.execute_steps(True)
         input_mock.assert_called_with("Stop Here\nType 'x' to exit\n")
         self.assertTrue(success)
         self.popen_mock.assert_called_with(['bash', '-c', 'echo "test"'],
@@ -485,9 +531,9 @@ echo "test"
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 0)
+        self.prep_command_output("test", "", 0)
         mm = MechanicalMarkdown(test_data, shell='cmd /c')
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         self.popen_mock.assert_called_with(['cmd', '/c', 'echo "test"'],
                                            stdout=subprocess.PIPE,
@@ -603,10 +649,10 @@ exit 15
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("test", "", 1)
-        self.prep_command_ouput("test", "", 15)
+        self.prep_command_output("test", "", 1)
+        self.prep_command_output("test", "", 15)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         calls = [call(['bash', '-c', 'exit 1'],
                       stdout=subprocess.PIPE,
@@ -649,9 +695,9 @@ echo blag
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("blag", "", 0)
+        self.prep_command_output("blag", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False, tags=("blag",))
+        success, report = mm.execute_steps(False, tags=("blag",))
         self.assertTrue(success, report)
         calls = [call(['bash', '-c', 'echo blag'],
                       stdout=subprocess.PIPE,
@@ -689,10 +735,10 @@ echo foo2
 
 <!-- END_STEP -->
 """
-        self.prep_command_ouput("tag foo\ntag bar", "", 0)
-        self.prep_command_ouput("foo2", "", 0)
+        self.prep_command_output("tag foo\ntag bar", "", 0)
+        self.prep_command_output("foo2", "", 0)
         mm = MechanicalMarkdown(test_data)
-        success, report = mm.exectute_steps(False)
+        success, report = mm.execute_steps(False)
         self.assertTrue(success)
         calls = [call(['bash', '-c', 'echo tag foo\necho tag bar'],
                       stdout=subprocess.PIPE,

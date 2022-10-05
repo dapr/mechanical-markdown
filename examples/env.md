@@ -55,7 +55,7 @@ export OVERRIDE_VARIABLE=overridden
 echo $OVERRIDE_VARIABLE
 ```
 
-Context is not shared between code blocks (even in the same step). Each code block gets their own exectution environment.
+Context is not shared between code blocks (even in the same step). Each code block gets their own execution environment.
 
 ```bash
 echo $OVERRIDE_VARIABLE
