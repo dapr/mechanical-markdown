@@ -88,6 +88,46 @@ echo "Match partial string"
 
 <!-- END_STEP -->
 
+## Match order
+
+You can specify the output matching order with the `match_order` directive.
+
+The two supported options are `sequential` and `none`. As their name suggests, `sequential` requires the output to match in the order specified, and `none` requires the output to match in any order. The default is `sequential`.
+
+<!-- STEP
+name: Sequential match order
+match_order: sequential
+expected_stdout_lines:
+  - "line 1"
+  - "line 2"
+-->
+
+This step uses `sequential` match order, and the output will be validated in the order specified.
+
+```bash
+echo "line 1"
+echo "line 2"
+```
+
+<!-- END_STEP -->
+
+<!-- STEP
+name: None match order
+match_order: none
+expected_stdout_lines:
+  - "line 1"
+  - "line 2"
+-->
+
+This step uses `none` match order, and the output won't require a specific order.
+
+```bash
+echo "line 2"
+echo "line 1"
+```
+
+<!-- END_STEP -->
+
 ## Checking return code
 
 By default, all code blocks are expected to return 0. You can change this behavior with the directive ```expected_return_code```:
