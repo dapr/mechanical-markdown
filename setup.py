@@ -34,7 +34,7 @@ setup(
     ],
     packages=find_packages(exclude='tests'),
     include_package_data=True,
-    install_requires=["termcolor", "pyyaml", "mistune==2.0.5", "requests", "colorama"],
+    install_requires=["termcolor", "pyyaml", "mistune>=3.0.0", "requests", "colorama"],
     entry_points={
         "console_scripts": [
             "mm.py = mechanical_markdown.__main__:main"
