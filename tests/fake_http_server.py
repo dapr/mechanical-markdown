@@ -18,6 +18,7 @@ class FakeHttpServer(Thread):
         super().__init__()
         self.server = HTTPServer(('localhost', 0), EmptyReplyHandler)
         self.response_codes = []
+        self.daemon = True
 
     def set_response_codes(self, codes):
         def response_code_generator():
