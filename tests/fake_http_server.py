@@ -13,12 +13,11 @@ class EmptyReplyHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 
-class FakeHttpServer(Thread):
+class FakeHttpServer():
     def __init__(self):
         super().__init__()
         self.server = HTTPServer(('localhost', 0), EmptyReplyHandler)
         self.response_codes = []
-        self.daemon = True
 
     def set_response_codes(self, codes):
         def response_code_generator():
@@ -29,10 +28,12 @@ class FakeHttpServer(Thread):
     def get_port(self):
         return self.server.socket.getsockname()[1]
 
+    def start(self):
+        self.thread = Thread(target=self.server.serve_forever)
+        self.thread.daemon = True
+        self.thread.start()
+        
     def shutdown_server(self):
         self.server.shutdown()
         self.server.socket.close()
-        self.join()
-
-    def run(self):
-        self.server.serve_forever()
+        self.thread.join()
