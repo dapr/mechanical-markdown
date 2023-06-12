@@ -81,8 +81,8 @@ class RecipeParser(HTMLRenderer):
 
         return ""
 
-    def link(self, text, url=None, title=None):
-        if re.match("https?://", url) is not None:
-            self.external_links.append((url, self.ignore_links))
+    def link(self, link, text=None, title=None):
+        if re.match("https?://", link) is not None:
+            self.external_links.append((link, self.ignore_links))
 
         return ""
