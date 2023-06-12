@@ -28,7 +28,7 @@ class FakeHttpServer():
     def get_port(self):
         return self.server.socket.getsockname()[1]
 
-    def start(self):
+    def start_server(self):
         self.thread = Thread(target=self.server.serve_forever)
         self.thread.daemon = True
         self.thread.start()

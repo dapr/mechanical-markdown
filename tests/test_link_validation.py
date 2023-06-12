@@ -4,6 +4,7 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT License.
 """
 
+import pytest
 import unittest
 
 from mechanical_markdown import MechanicalMarkdown
@@ -11,11 +12,19 @@ from fake_http_server import FakeHttpServer
 from termcolor import colored
 
 
+@pytest.fixture
+def fake_http_server():
+    return FakeHttpServer()
+
+
 class LinkValidationTests(unittest.TestCase):
+    @pytest.fixture(autouse=True)
+    def prepare_server(self, fake_http_server):
+        self.server = fake_http_server
+
     def setUp(self):
         self.command_ouputs = []
-        self.server = FakeHttpServer()
-        self.server.start()
+        self.server.start_server()
         self.host_port = f'localhost:{self.server.get_port()}'
 
     def tearDown(self):
