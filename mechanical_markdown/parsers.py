@@ -40,15 +40,17 @@ class RecipeParser(HTMLRenderer):
         self.ignore_links = False
         self.shell = shell
 
-    def block_code(self, text, lang=None):
-        if (lang is not None and lang.strip() in ('bash', 'sh', 'shell-script', 'shell')
-                and self.current_step is not None):
-            self.current_step.add_command_block(text)
+    def block_code(self, code: str, info=None):
+        if info:
+            lang = info.split(None, 1)[0]
+            if (lang is not None and lang.strip() in ('bash', 'sh', 'shell-script', 'shell')
+                    and self.current_step is not None):
+                self.current_step.add_command_block(code)
         return ""
 
-    def block_html(self, text):
+    def block_html(self, html: str):
         comment_parser = HTMLCommentParser()
-        comment_parser.feed(text)
+        comment_parser.feed(html)
 
         comment_body = comment_parser.comment_text
         if comment_body.find(end_token) >= 0:
