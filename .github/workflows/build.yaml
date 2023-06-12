@@ -30,8 +30,6 @@ jobs:
       run: |
         tox -e flake8
     - name: Run unit-tests
-      env:
-        COVERAGE_DEBUG: process,pid
       run: |
         tox -e py37
     - name: Run examples
