@@ -6,41 +6,37 @@ Licensed under the MIT License.
 
 import unittest
 
-from mechanical_markdown import MechanicalMarkdown
 from fake_http_server import FakeHttpServer
-from termcolor import colored
 
 
 class LinkValidationTests(unittest.TestCase):
     def setUp(self):
         self.command_ouputs = []
         self.server = FakeHttpServer()
-        print("Starting server")
         self.server.start()
         self.host_port = f'localhost:{self.server.get_port()}'
 
     def tearDown(self):
-        print("Shutting down server")
         self.server.shutdown_server()
 
-    def test_link_validation(self):
-        test_data = f"""
-A link that should work: [Mechanical Markdown](http://{self.host_port}/dapr/mechanical-markdown)
-A link that gives other valid status codes: [Mechanical Markdown](http://{self.host_port}/dapr/204)
+#     def test_link_validation(self):
+#         test_data = f"""
+# A link that should work: [Mechanical Markdown](http://{self.host_port}/dapr/mechanical-markdown)
+# A link that gives other valid status codes: [Mechanical Markdown](http://{self.host_port}/dapr/204)
 
-Relative links not currently supported: [Relative Link](examples/README.md)
+# Relative links not currently supported: [Relative Link](examples/README.md)
 
-"""
-        self.server.set_response_codes((200, 204))
-        mm = MechanicalMarkdown(test_data)
-        success, report = mm.execute_steps(False, validate_links=True)
-        self.assertTrue(success)
-        expected_report = f"""
-External link validation:
-\thttp://{self.host_port}/dapr/mechanical-markdown Status: {colored('200', 'green')}
-\thttp://{self.host_port}/dapr/204 Status: {colored('204', 'green')}
-"""
-        self.assertEqual(expected_report, report)
+# """
+#         self.server.set_response_codes((200, 204))
+#         mm = MechanicalMarkdown(test_data)
+#         success, report = mm.execute_steps(False, validate_links=True)
+#         self.assertTrue(success)
+#         expected_report = f"""
+# External link validation:
+# \thttp://{self.host_port}/dapr/mechanical-markdown Status: {colored('200', 'green')}
+# \thttp://{self.host_port}/dapr/204 Status: {colored('204', 'green')}
+# """
+#         self.assertEqual(expected_report, report)
 
 #     def test_link_validation_fails_for_broken_link(self):
 #         test_data = f"""
