@@ -30,6 +30,8 @@ jobs:
       run: |
         tox -e flake8
     - name: Run unit-tests
+      env:
+        PYTHONUNBUFFERED: 1
       run: |
         tox -e py37
     - name: Run examples
