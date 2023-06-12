@@ -32,7 +32,7 @@ class FakeHttpServer():
         self.thread = Thread(target=self.server.serve_forever)
         self.thread.daemon = True
         self.thread.start()
-        
+
     def shutdown_server(self):
         self.server.shutdown()
         self.server.socket.close()
