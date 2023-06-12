@@ -31,7 +31,7 @@ jobs:
         tox -e flake8
     - name: Run unit-tests
       run: |
-        tox -e py310
+        tox -e py37
     - name: Run examples
       run: |
         tox -e examples
