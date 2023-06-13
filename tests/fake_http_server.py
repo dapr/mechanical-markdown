@@ -1,7 +1,7 @@
 
 
 from threading import Thread
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 class EmptyReplyHandler(BaseHTTPRequestHandler):
@@ -16,7 +16,7 @@ class EmptyReplyHandler(BaseHTTPRequestHandler):
 class FakeHttpServer(Thread):
     def __init__(self):
         super().__init__()
-        self.server = HTTPServer(('localhost', 0), EmptyReplyHandler)
+        self.server = ThreadingHTTPServer(('localhost', 0), EmptyReplyHandler)
         self.response_codes = []
 
     def set_response_codes(self, codes):
@@ -28,10 +28,10 @@ class FakeHttpServer(Thread):
     def get_port(self):
         return self.server.socket.getsockname()[1]
 
-    def shutdown_server(self):
+    def shutdown_server(self, timeout=5):
         self.server.shutdown()
         self.server.socket.close()
-        self.join()
+        self.join(timeout=timeout)
 
     def run(self):
         self.server.serve_forever()
