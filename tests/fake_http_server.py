@@ -1,7 +1,7 @@
 
 
 from threading import Thread
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 class EmptyReplyHandler(BaseHTTPRequestHandler):
@@ -16,7 +16,7 @@ class EmptyReplyHandler(BaseHTTPRequestHandler):
 class FakeHttpServer(Thread):
     def __init__(self):
         super().__init__()
-        self.server = HTTPServer(('localhost', 0), EmptyReplyHandler)
+        self.server = ThreadingHTTPServer(('localhost', 0), EmptyReplyHandler)
         self.response_codes = []
 
     def set_response_codes(self, codes):
