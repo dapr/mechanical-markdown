@@ -48,10 +48,14 @@ class Recipe:
                     report += f'\t{link} Status: {colored("Ignored", "yellow")}\n'
                     continue
                 retries = link_retries
+
+                def failed(r):
+                    return r.status_code >= 400
+
                 while retries > 0:
                     try:
-                        response = requests.get(link)
-                        if response.status_code >= 400:
+                        if failed(response := requests.head(link)) and\
+                             failed(response := requests.get(link)):
                             retries -= 1
                             if retries == 0:
                                 success = False

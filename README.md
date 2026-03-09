@@ -7,9 +7,9 @@ If you are using markdown to create tutorials for your users, these markdown fil
 
 If you are regularly releasing software and having to manually verify your tutorials by copy pasting commands into a terminal every time you create a release, this is the package for you.
 
-The mechanical-markdown package is a Python library and corresponding shell script that allow you to run annotated markdown tutorials in an automated fashion. It will execute your markdown tutorials and verify the output according to expected stdout/stderr that you can embed directly into your markdown tutorials. 
+The mechanical-markdown package is a Python library and corresponding shell script that allow you to run annotated markdown tutorials in an automated fashion. It will execute your markdown tutorials and verify the output according to expected stdout/stderr that you can embed directly into your markdown tutorials.
 
-# Installing 
+# Installing
 
 This package requires a working python3 environment. You can install it using pip:
 
@@ -38,7 +38,7 @@ Auto validate markdown documentation
 positional arguments:
   markdown_file
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --dry-run, -d         Print out the commands we would run based on markdown_file
   --manual, -m          If your markdown_file contains manual validation steps, pause for user input
@@ -55,7 +55,7 @@ from mechanical_markdown import MechanicalMarkdown
 mm = MechanicalMarkdown(markdown_string, shell="bash -c")
 ```
 
-MechanicalMarkdown methods 
+MechanicalMarkdown methods
 
 ```python
 # Returns a string describing the commands that would be run

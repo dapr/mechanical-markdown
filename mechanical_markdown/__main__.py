@@ -5,6 +5,7 @@ Licensed under the MIT License.
 """
 
 import mechanical_markdown
+from mechanical_markdown.version import __version__
 
 import argparse
 import colorama
@@ -56,7 +57,7 @@ def main():
     args = parse_args.parse_args()
 
     if args.print_version:
-        parse_args.exit(status=0, message='{} version:\nv{}'.format(parse_args.prog, mechanical_markdown.__version__))
+        parse_args.exit(status=0, message='{} version:\nv{}'.format(parse_args.prog, __version__))
 
     if args.markdown_file is None:
         parse_args.error('You must provide exactly one markdown file to operate on.\n\
