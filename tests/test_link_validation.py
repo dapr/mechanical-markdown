@@ -78,6 +78,20 @@ External link validation:
 """
         self.assertEqual(expected_report, report)
 
+    def test_head_fallback_to_get(self):
+        test_data = f"""
+A link whose server does not support HEAD: [Mechanical Markdown](http://{self.host_port}/dapr/mechanical-markdown)
+"""
+        mm = MechanicalMarkdown(test_data)
+        self.server.set_response_codes(codes=(200,), head_codes=(405,))
+        success, report = mm.execute_steps(False, validate_links=True)
+        self.assertTrue(success)
+        expected_report = f"""
+External link validation:
+\thttp://{self.host_port}/dapr/mechanical-markdown Status: {colored('200', 'green')}
+"""
+        self.assertEqual(expected_report, report)
+
     def test_failed_links_are_retried(self):
         test_data = f"""
 A flaky link: [Mechanical Markdown](http://{self.host_port}/dapr/mechanical-markdown)

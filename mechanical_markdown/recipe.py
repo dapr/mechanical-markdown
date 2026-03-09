@@ -50,7 +50,9 @@ class Recipe:
                 retries = link_retries
                 while retries > 0:
                     try:
-                        response = requests.get(link)
+                        response = requests.head(link)
+                        if response.status_code >= 400:
+                            response = requests.get(link)
                         if response.status_code >= 400:
                             retries -= 1
                             if retries == 0:
