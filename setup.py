@@ -5,7 +5,11 @@ Licensed under the MIT License.
 """
 
 from setuptools import setup, find_packages
-from mechanical_markdown import __version__ as version
+
+version_info = {}
+with open("mechanical_markdown/version.py") as f:
+    exec(f.read(), version_info)
+version = version_info['__version__']
 
 # The text of the README file
 README = ""
