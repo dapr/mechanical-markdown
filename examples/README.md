@@ -23,28 +23,28 @@ One of the beautiful features of markdown is that it is both human and machine r
 
 To tell mechanical-markdown what parts of your document need to be executed as code, you must add an HTML comment that begins with the token ```STEP```. After this token, mechanical-markdown will interpret the rest of the comment as a yaml document with instructions for how the code blocks should be executed and verified. All fields in this yaml document are optional. Finish the comment to denote then end of the yaml document and the beginning of your exectuable markdown code. Finally, finish with an html comment like this: ```<!-- END_STEP -->``` to denote the end of a step. Let's look at a basic example:
 
-    <!-- STEP 
+    <!-- STEP
     name: Hello World
     expected_stdout_lines:
       - "Hello World!"
     -->
-    
+
     You can use regular markdown anywhere during a step. It will be ignored. Only denoted as bash, sh, shell or shell-script will be executed.
-    
+
     ```bash
     echo "Hello World!"
     ```
-    
+
     This python code block will not be executed:
-    
+
     ```python
     print("This python script will not be run")
     ```
-        
+
     <!-- END_STEP -->
-    
+
     This unannotated command will not be run:
-    
+
     ```bash
     echo "A command that will not be run"
     ```
@@ -53,7 +53,7 @@ Here's how the above will render in your markdown interpreter.
 
 ----
 
-<!-- STEP 
+<!-- STEP
 name: Hello World
 expected_stdout_lines:
   - "Hello World!"
@@ -72,7 +72,7 @@ print("This python script will not be run")
 ```
 
 <!-- END_STEP -->
-    
+
 This unannotated command will not be run:
 
 ```bash
@@ -81,21 +81,21 @@ echo "A command that will not be run"
 
 ----
 
-Let's breakdown what this embedded yaml annotation is doing. There are two fields in our yaml document ```name``` and ```expected_stdout_lines```. The name field simply provides a name for the step that will be printed to the report that mm.py generates. The expected_stdout_lines field is actually telling mm.py what it should be looking for from stdout when it executes our code block(s). For more on this, checkout [io.md](io.md). 
+Let's breakdown what this embedded yaml annotation is doing. There are two fields in our yaml document ```name``` and ```expected_stdout_lines```. The name field simply provides a name for the step that will be printed to the report that mm.py generates. The expected_stdout_lines field is actually telling mm.py what it should be looking for from stdout when it executes our code block(s). For more on this, checkout [io.md](io.md).
 
 ## CLI
 
 ### Help
 For a list of options:
 
-<!-- STEP 
+<!-- STEP
 name: CLI help
 expected_stdout_lines:
   - "usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]"
   - "             [--validate-links] [--link-retries RETRIES] [--tags TAGS]"
   - "             [MARKDOWN_FILE]"
   - "Auto validate markdown documentation"
-  - "optional arguments:"
+  - "options:"
   - "  -h, --help            show this help message and exit"
   - "  --version             Print version and exit"
   - "  --validate-links, -l  Check for broken links to external URLs"
@@ -126,7 +126,7 @@ usage: mm.py [-h] [--dry-run] [--manual] [--shell SHELL_CMD] [--version]
 
 Auto validate markdown documentation
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --version             Print version and exit
   --validate-links, -l  Check for broken links to external URLs
@@ -134,7 +134,7 @@ optional arguments:
                         Number of times to retry broken links [Default: 3].
                         Does nothing without -l
   --tags TAGS, -t TAGS  Tags used to filter steps
-  
+
   MARKDOWN_FILE         The annotated markdown file to run/execute
   --dry-run, -d         Print out the commands we would run based on
                         markdown_file
@@ -146,7 +146,7 @@ optional arguments:
 
 ### Version
 
-<!-- STEP 
+<!-- STEP
 name: CLI version
 expected_stderr_lines:
   - "mm.py version:"
@@ -161,7 +161,7 @@ mm.py --version
 ### Dry Run
 You can do a dry run to print out exactly what commands will be run using the '-d' flag.
 
-<!-- STEP 
+<!-- STEP
 name: CLI dry run
 expected_stdout_lines:
   - "Would run the following validation steps:"
@@ -214,7 +214,7 @@ Step: Hello World
 		Hello World!
 	Actual stdout:
 		Hello World!
-		
+
 	Expected stderr:
 	Actual stderr:
 ...
@@ -255,7 +255,7 @@ manual_pause_message: "Waiting for user input"
 <!-- END_STEP -->
 
 ```bash
-mm.py -m README.md 
+mm.py -m README.md
 ```
 
 ### Link validation
