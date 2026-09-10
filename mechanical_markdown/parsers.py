@@ -52,34 +52,29 @@ class RecipeParser(HTMLRenderer):
         comment_parser = HTMLCommentParser()
         comment_parser.feed(html)
 
-        comment_body = comment_parser.comment_text
-        if comment_body.find(end_token) >= 0:
+        comment_body = comment_parser.comment_text.strip()
+        if comment_body == end_token:
             if self.current_step is None:
                 raise MarkdownAnnotationError("Unexpected <!-- {} --> found".format(end_token))
             self.all_steps.append(self.current_step)
             self.current_step = None
             return ""
 
-        elif comment_body.find(ignore_links_token) >= 0:
+        elif comment_body == ignore_links_token:
             if self.ignore_links:
                 raise MarkdownAnnotationError(f"Duplicate <!-- {ignore_links_token} --> found")
             self.ignore_links = True
 
-        elif comment_body.find(end_ignore_links_token) >= 0:
+        elif comment_body == end_ignore_links_token:
             if not self.ignore_links:
                 raise MarkdownAnnotationError("Unexpected <!-- {} --> found".format(end_ignore_links_token))
             self.ignore_links = False
 
-        start_pos = comment_body.find(start_token)
+        elif comment_body.startswith(start_token):
+            if self.current_step is not None:
+                raise MarkdownAnnotationError(f"<!-- {start_token} --> found while still processing previous step")
 
-        if start_pos < 0:
-            return ""
-
-        if self.current_step is not None:
-            raise MarkdownAnnotationError(f"<!-- {start_token} --> found while still processing previous step")
-
-        start_pos += len(start_token)
-        self.current_step = Step(yaml.safe_load(comment_body[start_pos:]), self.shell)
+            self.current_step = Step(yaml.safe_load(comment_body[len(start_token):]), self.shell)
 
         return ""
 

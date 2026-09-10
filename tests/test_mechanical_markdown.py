@@ -349,6 +349,17 @@ echo "line 1"
                      call().communicate(timeout=DEFAULT_TIMEOUT)]
             self.popen_mock.assert_has_calls(calls)
 
+    def test_unrelated_comment_containing_step_substring_is_ignored(self):
+        test_data = """
+<!-- NEXTSTEP: run this next -->
+
+```bash
+echo "test"
+```
+"""
+        mm = MechanicalMarkdown(test_data)
+        self.assertEqual(len(mm.all_steps), 0)
+
     def test_exception_raised_for_invalid_match_order(self):
         test_data = """
 <!-- STEP
