@@ -461,8 +461,7 @@ echo "bar" >2`
         self.assertEqual(expected_output, output)
         self.popen_mock.assert_not_called()
 
-    @patch("mechanical_markdown.command.time.sleep")
-    def test_timed_out_processes_are_killed(self, sleep_mock):
+    def test_timed_out_processes_are_killed(self):
         test_data = """
 <!-- STEP
 name: basic test
@@ -490,7 +489,39 @@ echo "test"
                                            env=os.environ)
         self.process_mock.terminate.assert_called()
         self.process_mock.kill.assert_called()
-        self.process_mock.communicate.assert_has_calls([call(timeout=DEFAULT_TIMEOUT), call(timeout=DEFAULT_TIMEOUT)])
+        self.process_mock.communicate.assert_has_calls(
+            [call(timeout=DEFAULT_TIMEOUT), call(timeout=10), call(timeout=DEFAULT_TIMEOUT)])
+
+    def test_process_exiting_during_terminate_grace_period_is_not_killed(self):
+        test_data = """
+<!-- STEP
+name: basic test
+-->
+
+```bash
+echo "test"
+```
+
+<!-- END_STEP -->
+"""
+
+        call_count = 0
+
+        def timeout_then_exit(timeout=DEFAULT_TIMEOUT):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise subprocess.TimeoutExpired("foo", 60.0)
+            return ("test", "")
+
+        self.process_mock.communicate.side_effect = timeout_then_exit
+        self.process_mock.returncode = 0
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.execute_steps(False)
+        self.assertTrue(success)
+        self.process_mock.terminate.assert_called()
+        self.process_mock.kill.assert_not_called()
+        self.process_mock.communicate.assert_has_calls([call(timeout=DEFAULT_TIMEOUT), call(timeout=10)])
 
     @patch("builtins.input")
     def test_pause_waits_for_user_input(self, input_mock):

@@ -30,12 +30,14 @@ class Command(Thread):
             self.output['stdout'], self.output['stderr'] = self.process.communicate(timeout=self.timeout)
         except TimeoutExpired:
             self.process.terminate()
-            time.sleep(10)
-            self.process.kill()
             try:
-                self.output['stdout'], self.output['stderr'] = self.process.communicate(timeout=self.timeout)
+                self.output['stdout'], self.output['stderr'] = self.process.communicate(timeout=10)
             except TimeoutExpired:
-                pass
+                self.process.kill()
+                try:
+                    self.output['stdout'], self.output['stderr'] = self.process.communicate(timeout=self.timeout)
+                except TimeoutExpired:
+                    pass
 
         self.return_code = self.process.returncode
         self.duration_seconds = time.time() - self.start_time
