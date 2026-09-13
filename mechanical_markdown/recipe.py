@@ -27,12 +27,14 @@ class Recipe:
         success = True
         report = ""
         stepsToRun = list(filter(lambda step: self.filter_steps(tags, step), self.all_steps))
+        stepsExecuted = []
         for step in stepsToRun:
+            stepsExecuted.append(step)
             if not step.run_all_commands(manual):
                 success = False
                 break
 
-        for step in stepsToRun:
+        for step in stepsExecuted:
             if not step.wait_for_all_background_commands():
                 success = False
 
@@ -40,6 +42,12 @@ class Recipe:
             if not s:
                 success = False
             report += r
+
+        stepsSkipped = stepsToRun[len(stepsExecuted):]
+        if stepsSkipped:
+            report += "\nSkipped due to an earlier step failing:\n"
+            for step in stepsSkipped:
+                report += "\tStep: {}\n".format(step.name)
 
         if validate_links:
             report += "\nExternal link validation:\n"
