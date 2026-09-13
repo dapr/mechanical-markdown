@@ -233,6 +233,43 @@ echo "This should not be executed"
                                                 universal_newlines=True,
                                                 env=os.environ)
 
+    def test_skipped_steps_are_reported_as_skipped_not_failed(self):
+        test_data = """
+<!-- STEP
+name: this step fails
+-->
+
+```bash
+echo "test"
+```
+
+<!-- END_STEP -->
+
+<!-- STEP
+name: this step is skipped
+expected_stdout_lines:
+  - hello
+-->
+
+```bash
+echo "hello"
+```
+
+<!-- END_STEP -->
+"""
+        self.prep_command_output("test", "", 1)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.execute_steps(False)
+        self.assertFalse(success)
+        self.popen_mock.assert_called_once_with(['bash', '-c', 'echo "test"'],
+                                                stdout=subprocess.PIPE,
+                                                stderr=subprocess.PIPE,
+                                                universal_newlines=True,
+                                                env=os.environ)
+        self.assertIn("Skipped due to an earlier step failing", report)
+        self.assertIn("this step is skipped", report)
+        self.assertNotIn("expected lines not found", report)
+
     def test_missing_expected_line_causes_failure(self):
         test_data = """
 <!-- STEP
