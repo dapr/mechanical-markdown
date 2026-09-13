@@ -4,7 +4,6 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT License.
 """
 
-import os
 import time
 
 from subprocess import Popen, PIPE, TimeoutExpired
@@ -43,12 +42,10 @@ class Command(Thread):
     def run(self):
         args_list = self.shell.split()
         args_list.append(self.command)
-        pwd = os.getcwd()
-        os.chdir(self.cwd)
         print("Running shell '{}' with command: `{}`".format(self.shell, self.command))
         self.start_time = time.time()
-        self.process = Popen(args_list, universal_newlines=True, stdout=PIPE, stderr=PIPE, env=self.env)
-        os.chdir(pwd)
+        self.process = Popen(args_list, universal_newlines=True, stdout=PIPE, stderr=PIPE, env=self.env,
+                             cwd=self.cwd)
 
         self._wait_or_timeout()
 
