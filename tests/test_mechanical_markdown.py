@@ -59,10 +59,9 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=os.environ)
+                                           env=os.environ, cwd=os.getcwd())
 
-    @patch("mechanical_markdown.command.os.chdir")
-    def test_working_dir_success(self, chdir_mock):
+    def test_working_dir_success(self):
         test_data = """
 <!-- STEP
 name: basic test
@@ -83,8 +82,7 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=os.environ)
-        chdir_mock.assert_has_calls([call("./foo"), call(os.getcwd())])
+                                           env=os.environ, cwd="./foo")
 
     @patch("mechanical_markdown.step.time.sleep")
     def test_sleep_is_honored(self, sleep_mock):
@@ -108,7 +106,7 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=os.environ)
+                                           env=os.environ, cwd=os.getcwd())
         sleep_mock.assert_called_with(10)
 
     def test_env(self):
@@ -136,7 +134,7 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=dict(os.environ, **expected_env))
+                                           env=dict(os.environ, **expected_env), cwd=os.getcwd())
 
     def test_background_success(self):
         test_data = """
@@ -161,7 +159,7 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=os.environ)
+                                           env=os.environ, cwd=os.getcwd())
 
         self.process_mock.communicate.assert_called_with(timeout=DEFAULT_TIMEOUT)
 
@@ -188,7 +186,7 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=os.environ)
+                                           env=os.environ, cwd=os.getcwd())
 
         self.process_mock.communicate.assert_called_with(timeout=DEFAULT_TIMEOUT)
 
@@ -231,7 +229,7 @@ echo "This should not be executed"
                                                 stdout=subprocess.PIPE,
                                                 stderr=subprocess.PIPE,
                                                 universal_newlines=True,
-                                                env=os.environ)
+                                                env=os.environ, cwd=os.getcwd())
 
     def test_missing_expected_line_causes_failure(self):
         test_data = """
@@ -255,7 +253,7 @@ echo "test"
                                                 stdout=subprocess.PIPE,
                                                 stderr=subprocess.PIPE,
                                                 universal_newlines=True,
-                                                env=os.environ)
+                                                env=os.environ, cwd=os.getcwd())
 
     def test_expected_lines_succeed_when_matched(self):
         test_data = """
@@ -284,7 +282,7 @@ echo "error" 1>&2
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
-                      env=os.environ),
+                      env=os.environ, cwd=os.getcwd()),
                  call().communicate(timeout=DEFAULT_TIMEOUT)]
         self.popen_mock.assert_has_calls(calls)
 
@@ -312,7 +310,7 @@ echo "Match a substring"
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
-                      env=os.environ),
+                      env=os.environ, cwd=os.getcwd()),
                  call().communicate(timeout=DEFAULT_TIMEOUT)]
         self.popen_mock.assert_has_calls(calls)
 
@@ -345,7 +343,7 @@ echo "line 1"
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,
                           universal_newlines=True,
-                          env=os.environ),
+                          env=os.environ, cwd=os.getcwd()),
                      call().communicate(timeout=DEFAULT_TIMEOUT)]
             self.popen_mock.assert_has_calls(calls)
 
@@ -398,7 +396,7 @@ echo "test"
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
-                      env=os.environ),
+                      env=os.environ, cwd=os.getcwd()),
                  call().communicate(timeout=5)]
         self.popen_mock.assert_has_calls(calls)
 
@@ -487,7 +485,7 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=os.environ)
+                                           env=os.environ, cwd=os.getcwd())
         self.process_mock.terminate.assert_called()
         self.process_mock.kill.assert_called()
         self.process_mock.communicate.assert_has_calls([call(timeout=DEFAULT_TIMEOUT), call(timeout=DEFAULT_TIMEOUT)])
@@ -517,7 +515,7 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=os.environ)
+                                           env=os.environ, cwd=os.getcwd())
 
     def test_different_shell(self):
         test_data = """
@@ -539,7 +537,7 @@ echo "test"
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE,
                                            universal_newlines=True,
-                                           env=os.environ)
+                                           env=os.environ, cwd=os.getcwd())
 
     def test_missing_end_tag_throws_exception(self):
         test_data = """
@@ -658,13 +656,13 @@ exit 15
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
-                      env=os.environ),
+                      env=os.environ, cwd=os.getcwd()),
                  call().communicate(timeout=DEFAULT_TIMEOUT),
                  call(['bash', '-c', 'exit 15'],
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
-                      env=os.environ)]
+                      env=os.environ, cwd=os.getcwd())]
         self.popen_mock.assert_has_calls(calls)
 
     def test_steps_with_no_matching_tags_are_skipped(self):
@@ -703,7 +701,7 @@ echo blag
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
-                      env=os.environ),
+                      env=os.environ, cwd=os.getcwd()),
                  call().communicate(timeout=DEFAULT_TIMEOUT)]
         self.popen_mock.assert_has_calls(calls)
 
@@ -744,11 +742,11 @@ echo foo2
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
-                      env=os.environ),
+                      env=os.environ, cwd=os.getcwd()),
                  call().communicate(timeout=DEFAULT_TIMEOUT),
                  call(['bash', '-c', 'echo foo2'],
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE,
                       universal_newlines=True,
-                      env=os.environ)]
+                      env=os.environ, cwd=os.getcwd())]
         self.popen_mock.assert_has_calls(calls)
