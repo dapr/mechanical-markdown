@@ -141,8 +141,8 @@ class Step:
 
             # Find expected lines in the output
             output_lines_copy = output_lines[:]
-            for expected in self.expected_lines[out]:
-                if self.match_mode == 'exact':
+            if self.match_mode == 'exact':
+                for expected in self.expected_lines[out]:
                     if expected in output_lines_copy:
                         idx = output_lines_copy.index(expected)
                         # remove the line so it can't be matched again, but keep the index
@@ -150,12 +150,25 @@ class Step:
                         output_found_markers.append(idx)
                     else:
                         not_found[out].append(expected)
-                elif self.match_mode == 'substring':
-                    idx = Step.find_substring_in_list(expected, output_lines_copy)
+            elif self.match_mode == 'substring':
+                # Resolve longer, more specific expected substrings first so a
+                # shorter expected substring can't steal the output line that a
+                # longer expected substring also matches (e.g. expecting both
+                # "returned: 2" and "returned: 21" against a line "returned: 21").
+                by_length = sorted(
+                    range(len(self.expected_lines[out])),
+                    key=lambda i: len(self.expected_lines[out][i]),
+                    reverse=True)
+                matched_idx = {}
+                for i in by_length:
+                    idx = Step.find_substring_in_list(self.expected_lines[out][i], output_lines_copy)
                     if idx >= 0:
                         # remove the line so it can't be matched again, but keep the index
                         output_lines_copy[idx] = ""
-                        output_found_markers.append(idx)
+                        matched_idx[i] = idx
+                for i, expected in enumerate(self.expected_lines[out]):
+                    if i in matched_idx:
+                        output_found_markers.append(matched_idx[i])
                     else:
                         not_found[out].append(expected)
 

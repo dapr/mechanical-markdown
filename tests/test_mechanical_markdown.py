@@ -349,6 +349,29 @@ echo "line 1"
                      call().communicate(timeout=DEFAULT_TIMEOUT)]
             self.popen_mock.assert_has_calls(calls)
 
+    def test_substring_match_does_not_let_a_shorter_expected_line_steal_a_longer_match(self):
+        test_data = """
+<!-- STEP
+name: substring match order test
+match_order: none
+output_match_mode: substring
+expected_stdout_lines:
+  - 'returned: 2'
+  - 'returned: 21'
+-->
+
+```bash
+echo "returned: 21"
+echo "returned: 2"
+```
+
+<!-- END_STEP -->
+"""
+        self.prep_command_output("returned: 21\nreturned: 2", "", 0)
+        mm = MechanicalMarkdown(test_data)
+        success, report = mm.execute_steps(False)
+        self.assertTrue(success, report)
+
     def test_exception_raised_for_invalid_match_order(self):
         test_data = """
 <!-- STEP
